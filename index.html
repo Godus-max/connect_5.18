@@ -315,13 +315,47 @@ const soundBtn = $('#sound'), historyBtn = $('#historyBtn'), history = $('#histo
 const historyClose = $('#historyClose'), historyList = $('#historyList');
 const sprite = $('#sprite'), spriteImg = $('#spriteImg'), impactveil=$('#impactveil');
 const SHARE_URL='https://godus-max.github.io/connect_5.18/';
+
+/* ---------- 익명 이용 통계 (Google Analytics 4) ----------
+   아래 ID만 본인의 GA4 측정 ID(G-로 시작)로 바꾸면 활성화됩니다.
+   예: const GA_MEASUREMENT_ID='G-ABC123DE45';
+   ID가 기본값인 동안에는 어떤 분석 데이터도 전송하지 않습니다.
+*/
+const GA_MEASUREMENT_ID='G-Y82393339V';
+function analyticsEnabled(){
+  return /^G-[A-Z0-9]+$/i.test(GA_MEASUREMENT_ID) && GA_MEASUREMENT_ID!=='G-XXXXXXXXXX';
+}
+function initAnalytics(){
+  if(!analyticsEnabled()) return;
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=window.gtag||function(){window.dataLayer.push(arguments)};
+  const tag=document.createElement('script');
+  tag.async=true;
+  tag.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(GA_MEASUREMENT_ID);
+  document.head.appendChild(tag);
+  window.gtag('js',new Date());
+  window.gtag('config',GA_MEASUREMENT_ID,{
+    send_page_view:true,
+    allow_google_signals:false,
+    allow_ad_personalization_signals:false
+  });
+}
+function trackEvent(name,params={}){
+  if(!analyticsEnabled()||typeof window.gtag!=='function') return;
+  try{window.gtag('event',name,params)}catch(e){}
+}
+function analyticsSceneId(n){
+  const raw=resolve(n?.s)||'unknown';
+  return raw.replace(/[^A-Za-z0-9가-힣]+/g,'_').replace(/^_+|_+$/g,'').slice(0,80)||'unknown';
+}
+initAnalytics();
 const BG={
  modern:'assets/bg/room2024_phone.webp',homeN:'assets/bg/living_tv_on.webp',homeM:'assets/bg/living_day.webp',alley:'assets/bg/downtown_people.webp',shop:'assets/bg/younghee_super.webp',city:'assets/bg/downtown_people.webp',tension:'assets/bg/protest21.webp',shutter:'assets/bg/shutters.webp',academy:'assets/bg/academy_people.webp',hospital:'assets/bg/hospital_day.webp',news:'assets/bg/newspaper_street_day.webp',broadcast:'assets/bg/scene18_broadcast.webp',taxi:'assets/bg/scene19_taxis.webp',convoy:'assets/bg/vehicle_protest.webp',night:'assets/bg/residential_night.webp',hall:'assets/bg/provincial_office.webp',ywca:'assets/bg/ywca_final.webp',dawn:'assets/bg/living_blanket_off.webp',paper:'assets/bg/deulbul.webp',black:''
 };
 const CHAR={
  '민재':'assets/chars/core_01_minjae_halfbody.webp','혜민':'assets/chars/core_02_hyemin_halfbody.webp','연 기자':'assets/chars/core_03_reporter_yeon_halfbody.webp','기자':'assets/chars/core_03_reporter_yeon_halfbody.webp','방 기사':'assets/chars/core_04_driver_bang_halfbody.webp','영희':'assets/chars/core_05_younghee_halfbody.webp','어머니':'assets/chars/core_06_mother_halfbody.webp','아버지':'assets/chars/core_07_father_halfbody.webp','다른 택시 기사':'assets/chars/03_other_taxi_driver.webp','학생':'assets/chars/04_student_male_A.webp','여학생':'assets/chars/05_student_female_B.webp','젊은 남자':'assets/chars/06_young_civilian_male.webp','중년 여성':'assets/chars/07_middleaged_civilian_female.webp','중년 남성':'assets/chars/08_middleaged_civilian_male.webp','다른 간호사':'assets/chars/10_other_nurse.webp','간호사':'assets/chars/10_other_nurse.webp','병원 직원':'assets/chars/11_hospital_support_worker.webp','시민':'assets/chars/23_unarmed_citizen.webp','다른 시민':'assets/chars/23_unarmed_citizen.webp','가두방송 여성':'assets/chars/17_street_broadcast_woman.webp','사회자':'assets/chars/19_rally_emcee.webp','낭독자':'assets/chars/20_declaration_reader.webp'
 };
-let lastScene='', martialPlayed=false;
+let lastScene='', martialPlayed=false, completionTracked=false;
 
 /* ---------- 실제 녹음·효과음 ---------- */
 const AUDIO_SRC={
@@ -369,7 +403,13 @@ const AUDIO_SRC={
   radioTune:'assets/audio/sfx_radio_tune.mp3',
   siren:'assets/audio/sfx_siren.mp3'
 };
-const activeMedia=new Set(), playedAudio=new Set();
+const activeMedia=new Set(), playedAudio=new Set(), playedSceneFx=new Set();
+function playSceneFxOnce(sceneKey,effectKey,key,opt={}){
+  const id=String(sceneKey||'scene')+'::'+String(effectKey||key);
+  if(playedSceneFx.has(id)) return null;
+  playedSceneFx.add(id);
+  return playFile(key,opt);
+}
 let currentVoice=null, currentAmbient=null, currentAmbientKey='', currentOverlay=null, currentOverlayKey='';
 let criticalAudio=null, audioLockedNode=null;
 
@@ -448,11 +488,22 @@ function releaseAudioLock(n=null){
 function syncSceneAudio(n){
   if(!soundOn){setAmbient(null);setOverlay(null);return}
   const s=resolve(n.s)||'';
+
+  // 피신 장면은 짧은 현장음을 한 번만 들려주고 반복 루프를 사용하지 않는다.
+  if(/^SCENE 0[67]/.test(s)){
+    setAmbient(null);setOverlay(null);
+    playSceneFxOnce('HIDE_0518','demo_once','demo',{volume:.27});
+    return;
+  }
+  // 5월 21일 집단발포 직후 건물 안 피신 구간은 총성·발소리 등의 개별 효과만 사용한다.
+  if(s.startsWith('SCENE 28')||s.startsWith('SCENE 29')){
+    setAmbient(null);setOverlay(null);return;
+  }
+
   let amb=null,vol=.34;
-  if(/^SCENE 0[67]/.test(s)){amb='demo';vol=.32}
-  else if(/^SCENE (1[256789]|20|21|31|32|33|34|44|49|50|53|55|56|57|68)$/.test(s.split(' · ')[0])){amb='city';vol=.30}
+  if(/^SCENE (1[256789]|20|21|31|32|33|34|44|49|50|53|55|56|57|68)$/.test(s.split(' · ')[0])){amb='city';vol=.30}
   else if(s.startsWith('SCENE 13')||s.startsWith('SCENE 30')||s.startsWith('SCENE 42-B')){amb='hospital';vol=.30}
-  else if(s.startsWith('SCENE 24')||s.startsWith('SCENE 25')||s.startsWith('SCENE 26')||s.startsWith('SCENE 27')||s.startsWith('SCENE 28')||s.startsWith('SCENE 29')||s.startsWith('SCENE 40')||s.startsWith('SCENE 43')||s.startsWith('SCENE 51')||s.startsWith('SCENE 52')||s.startsWith('SCENE 65')||s.startsWith('SCENE 69')||s.startsWith('SCENE 70')||s.startsWith('SCENE 71')){amb='demo';vol=.34}
+  else if(s.startsWith('SCENE 24')||s.startsWith('SCENE 25')||s.startsWith('SCENE 26')||s.startsWith('SCENE 27')||s.startsWith('SCENE 40')||s.startsWith('SCENE 43')||s.startsWith('SCENE 51')||s.startsWith('SCENE 52')||s.startsWith('SCENE 65')||s.startsWith('SCENE 69')||s.startsWith('SCENE 70')||s.startsWith('SCENE 71')){amb='demo';vol=.34}
   else if(s.startsWith('SCENE 47')||s.startsWith('SCENE 48')){amb='printing';vol=.30}
   setAmbient(amb,vol);
   if(s.startsWith('SCENE 26')||s.startsWith('SCENE 31'))setOverlay('heli',.38); else setOverlay(null);
@@ -2070,23 +2121,34 @@ function fx(n){
   if(soundOn && !martialPlayed && ss.startsWith('SCENE 01') && pp==='뉴스 앵커'){
     martialPlayed=true;playVoiceOnce('martial-law','martial',{volume:1});
   }
-
-  if(ss.startsWith('SCENE 06')){
-    if(tt.startsWith('구호.')){playFile('horn',{volume:.88});setTimeout(()=>playFile('glass',{volume:.95}),900)}
-    if(tt.includes('버스 한 대가 급하게 멈춰'))playFile('engine',{volume:.72});
-    if(tt.includes('셔터가 올라간다'))playFile('shutter',{volume:.98});
+  // TV를 끄는 순간 계엄 선포 뉴스 음성도 즉시 멈춘다.
+  if(ss.startsWith('SCENE 01')&&tt.includes('TV를 끈다')){
+    if(currentVoice)mediaStop(currentVoice);
   }
-  if(ss.startsWith('SCENE 07')&&tt.includes('군홧발'))playFile('boots',{volume:.92});
 
-  if(ss.startsWith('SCENE 11')&&tt.includes('문이 열린다')){playFile('door',{volume:.86});setTimeout(()=>playFile('running',{volume:.94}),350)}
+  // 긴박한 피신/가게 구간의 효과음은 같은 장면에서 한 번만 들리게 한다.
+  if(ss.startsWith('SCENE 06')){
+    if(tt.startsWith('구호.')){
+      const a=playSceneFxOnce('SCENE06','horn','horn',{volume:.88});
+      if(a)setTimeout(()=>playSceneFxOnce('SCENE06','glass','glass',{volume:.95}),900);
+    }
+    if(tt.includes('버스 한 대가 급하게 멈춰'))playSceneFxOnce('SCENE06','engine','engine',{volume:.72});
+    if(tt.includes('셔터가 올라간다'))playSceneFxOnce('SCENE06','shutter','shutter',{volume:.98});
+  }
+  if(ss.startsWith('SCENE 07')&&tt.includes('군홧발'))playSceneFxOnce('SCENE07','boots','boots',{volume:.92});
+
+  if(ss.startsWith('SCENE 11')&&tt.includes('문이 열린다')){
+    const a=playSceneFxOnce('SCENE11','door','door',{volume:.86});
+    if(a)setTimeout(()=>playSceneFxOnce('SCENE11','running','running',{volume:.94}),350);
+  }
   if(ss.startsWith('SCENE 12')&&(tt.includes('수첩')||tt.includes('적는다')||tt.includes('적힌다')))playFile('writing',{volume:.72});
-  if(ss.startsWith('SCENE 13')&&tt.includes('상자'))playFile('box',{volume:.72});
-  if(ss.startsWith('SCENE 14')&&tt.includes('채널 손잡이'))playFile('radioTune',{volume:.70});
+  if(ss.startsWith('SCENE 13')&&tt.includes('상자'))playSceneFxOnce('SCENE13','box','box',{volume:.72});
+  if(ss.startsWith('SCENE 14')&&tt.includes('채널 손잡이'))playSceneFxOnce('SCENE14','radioTune','radioTune',{volume:.70});
 
   if(ss.startsWith('SCENE 18')&&tt.includes('방송 차량이 지나간다')){
     const a=playVoiceOnce('0519-street','v0519',{volume:1});lockToAudio(a,n);
   }
-  if(ss.startsWith('SCENE 21')&&tt.includes('박수가 번진다'))playFile('applause',{volume:.62});
+  if(ss.startsWith('SCENE 21')&&tt.includes('박수가 번진다'))playSceneFxOnce('SCENE21','applause','applause',{volume:.62});
   if(ss.startsWith('SCENE 22')&&n.fx==='shot')shot();
 
   if(ss.startsWith('SCENE 26')&&tt.includes('헬기에서 방송')){
@@ -2105,7 +2167,7 @@ function fx(n){
     if(tt.includes('뛰어요')||tt.includes('몇 걸음 뛰다가'))playFile('running',{volume:1});
     if(tt.includes('다시 총성')){playFile('closeShot',{volume:.92});shake();return}
   }
-  if(ss.startsWith('SCENE 29')&&tt.includes('멀리서 다시 총성'))playFile('farShot',{volume:.9});
+  if(ss.startsWith('SCENE 29')&&tt.includes('멀리서 다시 총성'))playSceneFxOnce('SCENE29','farShot','farShot',{volume:.9});
 
   if(ss.startsWith('SCENE 36')){
     if(tt.includes('수화기를 귀에 댄')){playFile('phonePickup',{volume:.85});setTimeout(()=>playFile('phoneNoise',{volume:.72}),300)}
@@ -2114,20 +2176,21 @@ function fx(n){
   }
 
   if(ss.startsWith('SCENE 39')){
-    if(tt.includes('엔진 소리가'))playFile('engine',{volume:.78});
+    if(tt.includes('엔진 소리가'))playSceneFxOnce('SCENE39','engine','engine',{volume:.78});
     if(tt.includes('헌혈을 부탁'))playVoiceOnce('0522-blood','v0522blood',{volume:1});
   }
 
   if(ss.startsWith('SCENE 46')&&tt.includes('빗자루 끄는 소리')){
-    playFile('sweeping',{volume:.76});setTimeout(()=>playFile('engine',{volume:.52}),500)
+    const a=playSceneFxOnce('SCENE46','sweeping','sweeping',{volume:.76});
+    if(a)setTimeout(()=>playSceneFxOnce('SCENE46','engine','engine',{volume:.52}),500);
   }
   if(ss.startsWith('SCENE 46')&&tt.includes('멀리서 확성기 소리'))playVoiceOnce('0523-guide','v0523guide',{volume:.9});
-  if((ss.startsWith('SCENE 48')||ss.startsWith('SCENE 50-A'))&&(tt.includes('종이')||tt.includes('묶음')))playFile('paper',{volume:.72});
+  if((ss.startsWith('SCENE 48')||ss.startsWith('SCENE 50-A'))&&(tt.includes('종이')||tt.includes('묶음')))playSceneFxOnce(ss.startsWith('SCENE 48')?'SCENE48':'SCENE50A','paper','paper',{volume:.72});
   if(ss.startsWith('SCENE 51')&&tt.includes('큰 군중이 모인다'))playVoiceOnce('rally-23','rallyVoice',{volume:.88});
 
   if(ss.startsWith('SCENE 65')){
     if(tt.includes('궐기대회가 열린다'))playVoiceOnce('rally-25','rallyVoice',{volume:.92});
-    if(tt.includes('박수를 친다'))playFile('applause',{volume:.9});
+    if(tt.includes('박수를 친다'))playSceneFxOnce('SCENE65','applause','applause',{volume:.9});
   }
 
   if(ss.startsWith('SCENE 69')&&n.fx==='engine'){playFile('tank',{volume:.95});return}
@@ -2189,10 +2252,15 @@ function render(){
     game.classList.remove('auto-cinematic');impactveil.classList.remove('flash');
     common(n);sprite.classList.remove('show');dialog.style.display='none';choices.innerHTML='';nextMark.style.display='none';
     const arr=resolve(n.a)||[];
-    for(const a of arr){
+    arr.forEach((a,choiceIndex)=>{
       const b=document.createElement('button');b.className='choice';const label=resolve(a.text);b.textContent=label;
       b.onclick=e=>{
         e.stopPropagation();click();addChoiceHistory(label,n,a);
+        trackEvent('choice_selected',{
+          scene_id:analyticsSceneId(n),
+          choice_index:choiceIndex+1,
+          choice_label:String(label||'').slice(0,100)
+        });
         const before={...state.bond};
         a.effect&&a.effect();
         // Record which NPC this choice actually increased, for tie-breaking.
@@ -2201,7 +2269,7 @@ function render(){
         branchQueue=(resolve(a.after)||[]).slice();render();
       };
       choices.appendChild(b);
-    }
+    });
     choices.style.display='flex';
   } else if(n.type==='t'){
     // 날짜/챕터 전환 카드는 띄우지 않고 다음 장면으로 바로 이어간다.
@@ -2221,6 +2289,16 @@ dialog.onclick=next;
 /* ---------- 엔딩 / 기록 UI ---------- */
 function showEnding(){
   ensureAnchor();if(!state.endingType)state.endingType=calcEndingType();
+  if(!completionTracked){
+    completionTracked=true;
+    trackEvent('simulation_complete',{
+      ending_type:String(state.endingType||'unknown').slice(0,80),
+      closest_npc:String(ensureAnchor()||'unknown').slice(0,40),
+      final_location:String(state.finalLocation||'unknown').slice(0,40),
+      left_home:state.finalAway?'yes':'no',
+      choice_count:selectedChoices().length
+    });
+  }
   const d=endingData[state.endingType]||endingData.balanced;
   end.innerHTML=`<div class="ending-scroll">
     <div class="ending-kicker">EPILOGUE</div>
@@ -2261,6 +2339,7 @@ function recordContext(title){
 }
 function showRecord(idx){
   const cards=recordCards(), r=cards[idx];
+  trackEvent('record_card_view',{record_index:idx+1,record_title:String(r?.title||'').slice(0,100)});
   const imgs=(r.images||[]).map(x=>`<figure><img src="${x.src}" alt="${esc(r.title)} 관련 기록 이미지" loading="lazy"><figcaption>${esc(x.caption)}</figcaption></figure>`).join('');
   const excerpts=r.excerpts||[]; const first=excerpts[0]?`<div class="record-excerpt">${esc(excerpts[0])}</div>`:'';
   const cx=recordContext(r.title);
@@ -2347,17 +2426,18 @@ function showShareOptions(){
       <button class="end-secondary" id="backFinal">마지막 화면으로</button>
     </div>
   </div>`;
-  $('#sharePlain').onclick=()=>shareMessage(msgs.plain);
-  $('#shareEnding').onclick=()=>shareMessage(msgs.ending);
+  $('#sharePlain').onclick=()=>shareMessage(msgs.plain,'plain');
+  $('#shareEnding').onclick=()=>shareMessage(msgs.ending,'ending');
   $('#backFinal').onclick=showFinalMenu;
 }
-async function shareMessage(msg){
+async function shareMessage(msg,mode='plain'){
   const withLink=`${msg}\n${SHARE_URL}`;
   try{
     // Web Share에서는 URL을 별도 필드로 한 번만 넘겨 중복 표시를 막는다.
     if(navigator.share) await navigator.share({title:'그날, 우리는',text:msg,url:SHARE_URL});
     else if(navigator.clipboard){await navigator.clipboard.writeText(withLink);alert('공유 문구를 복사했습니다.');}
     else alert(withLink);
+    trackEvent('share_project',{share_mode:mode});
   }catch(e){}
 }
 
@@ -2365,7 +2445,7 @@ async function shareMessage(msg){
 soundBtn.onclick=e=>{e.stopPropagation();soundOn=!soundOn;soundIcon();if(!soundOn)stopAllStoryAudio();else{audio();const n=currentNode();if(n)syncSceneAudio(n)}};
 historyBtn.onclick=e=>{e.stopPropagation();drawHistory();history.style.display='block'};
 historyClose.onclick=e=>{e.stopPropagation();history.style.display='none'};
-$('#start').onclick=()=>{cover.style.display='none';audio();soundIcon();render()};
+$('#start').onclick=()=>{cover.style.display='none';trackEvent('simulation_start',{version:'final_analytics_audio_v1'});audio();soundIcon();render()};
 function restartGame(){location.reload()}
 soundIcon();
 window.addEventListener('keydown',e=>{
