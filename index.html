@@ -231,6 +231,19 @@ button{font:inherit}
 .credit-rule{margin-top:18px;padding-top:16px;border-top:1px solid #ffffff18}
 @media(max-width:360px){.dialog{left:7px;right:7px;padding:12px 13px}.sprite{height:53%;bottom:24%}.top{padding-left:9px;padding-right:9px}.topbtn{width:40px;height:40px}}
 
+/* final continuity / cinematic polish */
+.bg{transition:opacity .28s ease,filter .55s ease}
+.bg.bg-swap{animation:bgSwap .34s ease}
+.bg.dawn-tone{filter:brightness(1.08) saturate(.88)}
+@keyframes bgSwap{0%{opacity:.40}100%{opacity:1}}
+.impactveil{position:absolute;inset:0;z-index:43;pointer-events:none;background:#000;opacity:0;transition:opacity .18s ease}
+.auto-cinematic .impactveil{opacity:.94}
+.auto-cinematic .dialog{opacity:0!important;pointer-events:none}
+.auto-cinematic .sprite{opacity:0!important}
+.auto-cinematic .top{opacity:.15}
+.impactveil.flash{animation:impactFlash .42s ease}
+@keyframes impactFlash{0%{background:#fff;opacity:.98}18%{background:#fff;opacity:.86}42%{background:#000;opacity:.98}100%{background:#000;opacity:.94}}
+
 </style>
 </head>
 <body>
@@ -260,6 +273,7 @@ button{font:inherit}
 
   <div class="choices" id="choices"></div>
   <div class="noise"></div>
+  <div class="impactveil" id="impactveil"></div>
 
   <div class="card" id="card">
     <b id="cardBig"></b>
@@ -299,7 +313,7 @@ const cover = $('#cover'), end = $('#end'), wm = $('#wm'), sub = $('#sub');
 const card = $('#card'), cardBig = $('#cardBig'), cardSmall = $('#cardSmall');
 const soundBtn = $('#sound'), historyBtn = $('#historyBtn'), history = $('#history');
 const historyClose = $('#historyClose'), historyList = $('#historyList');
-const sprite = $('#sprite'), spriteImg = $('#spriteImg');
+const sprite = $('#sprite'), spriteImg = $('#spriteImg'), impactveil=$('#impactveil');
 const SHARE_URL='https://godus-max.github.io/connect_5.18/';
 const BG={
  modern:'assets/bg/room2024_phone.webp',homeN:'assets/bg/living_tv_on.webp',homeM:'assets/bg/living_day.webp',alley:'assets/bg/downtown_people.webp',shop:'assets/bg/younghee_super.webp',city:'assets/bg/downtown_people.webp',tension:'assets/bg/protest21.webp',shutter:'assets/bg/shutters.webp',academy:'assets/bg/academy_people.webp',hospital:'assets/bg/hospital_day.webp',news:'assets/bg/newspaper_street_day.webp',broadcast:'assets/bg/scene18_broadcast.webp',taxi:'assets/bg/scene19_taxis.webp',convoy:'assets/bg/vehicle_protest.webp',night:'assets/bg/residential_night.webp',hall:'assets/bg/provincial_office.webp',ywca:'assets/bg/ywca_final.webp',dawn:'assets/bg/living_blanket_off.webp',paper:'assets/bg/deulbul.webp',black:''
@@ -308,25 +322,160 @@ const CHAR={
  '민재':'assets/chars/core_01_minjae_halfbody.webp','혜민':'assets/chars/core_02_hyemin_halfbody.webp','연 기자':'assets/chars/core_03_reporter_yeon_halfbody.webp','기자':'assets/chars/core_03_reporter_yeon_halfbody.webp','방 기사':'assets/chars/core_04_driver_bang_halfbody.webp','영희':'assets/chars/core_05_younghee_halfbody.webp','어머니':'assets/chars/core_06_mother_halfbody.webp','아버지':'assets/chars/core_07_father_halfbody.webp','다른 택시 기사':'assets/chars/03_other_taxi_driver.webp','학생':'assets/chars/04_student_male_A.webp','여학생':'assets/chars/05_student_female_B.webp','젊은 남자':'assets/chars/06_young_civilian_male.webp','중년 여성':'assets/chars/07_middleaged_civilian_female.webp','중년 남성':'assets/chars/08_middleaged_civilian_male.webp','다른 간호사':'assets/chars/10_other_nurse.webp','간호사':'assets/chars/10_other_nurse.webp','병원 직원':'assets/chars/11_hospital_support_worker.webp','시민':'assets/chars/23_unarmed_citizen.webp','다른 시민':'assets/chars/23_unarmed_citizen.webp','가두방송 여성':'assets/chars/17_street_broadcast_woman.webp','사회자':'assets/chars/19_rally_emcee.webp','낭독자':'assets/chars/20_declaration_reader.webp'
 };
 let lastScene='', martialPlayed=false;
-const martialAudio=new Audio('assets/audio/martial_law_tv.mp3'); martialAudio.preload='auto'; martialAudio.volume=1;
+
+/* ---------- 실제 녹음·효과음 ---------- */
+const AUDIO_SRC={
+  martial:'assets/audio/voice_martial_tv.mp3',
+  v0519:'assets/audio/voice_0519_street.mp3',
+  v0521heli:'assets/audio/voice_0521_heli.mp3',
+  v0522blood:'assets/audio/voice_0522_blood.mp3',
+  v0523guide:'assets/audio/voice_0523_guide.mp3',
+  v0526:'assets/audio/voice_0526_street.mp3',
+  v0527student:'assets/audio/voice_0527_student.mp3',
+  v0527military:'assets/audio/voice_0527_military.mp3',
+  citizen1:'assets/audio/voice_citizen_1.mp3',
+  citizen2:'assets/audio/voice_citizen_2.mp3',
+  citizen3:'assets/audio/voice_citizen_3.mp3',
+  rallyVoice:'assets/audio/voice_rally.mp3',
+  massFire21:'assets/audio/sfx_0521_mass_fire.mp3',
+  gunfire27:'assets/audio/sfx_0527_transition.mp3',
+  horn:'assets/audio/sfx_horn.mp3',
+  glass:'assets/audio/sfx_glass.mp3',
+  shutter:'assets/audio/sfx_shutter.mp3',
+  boots:'assets/audio/sfx_boots.mp3',
+  running:'assets/audio/sfx_running.mp3',
+  city:'assets/audio/amb_city.mp3',
+  demo:'assets/audio/amb_demo.mp3',
+  heli:'assets/audio/amb_heli.mp3',
+  hospital:'assets/audio/amb_hospital.mp3',
+  applause:'assets/audio/sfx_applause.mp3',
+  writing:'assets/audio/sfx_writing.mp3',
+  printing:'assets/audio/sfx_printing.mp3',
+  paper:'assets/audio/sfx_paper.mp3',
+  engine:'assets/audio/sfx_engine.mp3',
+  tank:'assets/audio/sfx_tank.mp3',
+  farShot:'assets/audio/sfx_far_gunshot.mp3',
+  closeShot:'assets/audio/sfx_close_gunshot.mp3',
+  phonePickup:'assets/audio/sfx_phone_pickup.mp3',
+  phoneDial:'assets/audio/sfx_phone_dial.mp3',
+  phoneNoise:'assets/audio/sfx_phone_noise.mp3',
+  phoneDown:'assets/audio/sfx_phone_down.mp3',
+  phoneDisconnect:'assets/audio/sfx_phone_disconnect.mp3',
+  box:'assets/audio/sfx_box.mp3',
+  door:'assets/audio/sfx_door.mp3',
+  sweeping:'assets/audio/sfx_sweeping.mp3',
+  micNoise:'assets/audio/sfx_mic_noise.mp3',
+  radioStatic:'assets/audio/sfx_radio_static.mp3',
+  radioTune:'assets/audio/sfx_radio_tune.mp3',
+  siren:'assets/audio/sfx_siren.mp3'
+};
+const activeMedia=new Set(), playedAudio=new Set();
+let currentVoice=null, currentAmbient=null, currentAmbientKey='', currentOverlay=null, currentOverlayKey='';
+let criticalAudio=null, audioLockedNode=null;
+
+function mediaStop(a){
+  if(!a)return;
+  try{a.pause();a.currentTime=0}catch(e){}
+  activeMedia.delete(a);
+  if(currentVoice===a)currentVoice=null;
+  if(currentAmbient===a){currentAmbient=null;currentAmbientKey=''}
+  if(currentOverlay===a){currentOverlay=null;currentOverlayKey=''}
+  if(criticalAudio===a)criticalAudio=null;
+}
+function playFile(key,{volume=1,loop=false,start=0,onended=null}={}){
+  if(!soundOn||!AUDIO_SRC[key])return null;
+  const a=new Audio(AUDIO_SRC[key]);
+  a.preload='auto';a.volume=Math.max(0,Math.min(1,volume));a.loop=loop;
+  if(start>0)a.currentTime=start;
+  activeMedia.add(a);
+  const done=()=>{if(!loop)activeMedia.delete(a);if(currentVoice===a)currentVoice=null;if(onended)onended();};
+  a.addEventListener('ended',done,{once:true});
+  a.play().catch(()=>{activeMedia.delete(a);});
+  return a;
+}
+function playOnce(id,key,opt={}){
+  if(playedAudio.has(id))return null;
+  playedAudio.add(id);return playFile(key,opt);
+}
+function playVoice(key,opt={}){
+  if(currentVoice)mediaStop(currentVoice);
+  currentVoice=playFile(key,{volume:1,...opt});
+  return currentVoice;
+}
+function playVoiceOnce(id,key,opt={}){
+  if(playedAudio.has(id))return null;
+  playedAudio.add(id);return playVoice(key,opt);
+}
+function playVoiceSequence(keys,idx=0){
+  if(idx===0&&currentVoice)mediaStop(currentVoice);
+  if(idx>=keys.length)return;
+  currentVoice=playFile(keys[idx],{volume:1,onended:()=>playVoiceSequence(keys,idx+1)});
+}
+function setAmbient(key,volume=.36){
+  if(!soundOn||!key){if(currentAmbient)mediaStop(currentAmbient);return}
+  if(currentAmbientKey===key&&currentAmbient&&!currentAmbient.paused)return;
+  if(currentAmbient)mediaStop(currentAmbient);
+  currentAmbientKey=key;currentAmbient=playFile(key,{volume,loop:true});
+}
+function setOverlay(key,volume=.38){
+  if(!soundOn||!key){if(currentOverlay)mediaStop(currentOverlay);return}
+  if(currentOverlayKey===key&&currentOverlay&&!currentOverlay.paused)return;
+  if(currentOverlay)mediaStop(currentOverlay);
+  currentOverlayKey=key;currentOverlay=playFile(key,{volume,loop:true});
+}
+function stopCritical(){if(criticalAudio)mediaStop(criticalAudio)}
+function stopAllStoryAudio(){
+  for(const a of [...activeMedia])mediaStop(a);
+  currentVoice=currentAmbient=currentOverlay=criticalAudio=null;
+  currentAmbientKey=currentOverlayKey='';
+  releaseAudioLock();
+}
+function lockToAudio(a,n){
+  if(!a||!soundOn)return;
+  audioLockedNode=n;locked=true;nextMark.style.display='none';
+  const release=()=>{if(audioLockedNode===n)releaseAudioLock(n)};
+  a.addEventListener('ended',release,{once:true});
+  a.addEventListener('error',release,{once:true});
+}
+function releaseAudioLock(n=null){
+  if(n&&audioLockedNode!==n)return;
+  const node=audioLockedNode;audioLockedNode=null;
+  if(node&&currentNode()===node){
+    locked=false;
+    if(node.type==='l'&&!node.auto)nextMark.style.display='block';
+  }else if(!n){locked=false}
+}
+function syncSceneAudio(n){
+  if(!soundOn){setAmbient(null);setOverlay(null);return}
+  const s=resolve(n.s)||'';
+  let amb=null,vol=.34;
+  if(/^SCENE 0[67]/.test(s)){amb='demo';vol=.32}
+  else if(/^SCENE (1[256789]|20|21|31|32|33|34|44|49|50|53|55|56|57|68)$/.test(s.split(' · ')[0])){amb='city';vol=.30}
+  else if(s.startsWith('SCENE 13')||s.startsWith('SCENE 30')||s.startsWith('SCENE 42-B')){amb='hospital';vol=.30}
+  else if(s.startsWith('SCENE 24')||s.startsWith('SCENE 25')||s.startsWith('SCENE 26')||s.startsWith('SCENE 27')||s.startsWith('SCENE 28')||s.startsWith('SCENE 29')||s.startsWith('SCENE 40')||s.startsWith('SCENE 43')||s.startsWith('SCENE 51')||s.startsWith('SCENE 52')||s.startsWith('SCENE 65')||s.startsWith('SCENE 69')||s.startsWith('SCENE 70')||s.startsWith('SCENE 71')){amb='demo';vol=.34}
+  else if(s.startsWith('SCENE 47')||s.startsWith('SCENE 48')){amb='printing';vol=.30}
+  setAmbient(amb,vol);
+  if(s.startsWith('SCENE 26')||s.startsWith('SCENE 31'))setOverlay('heli',.38); else setOverlay(null);
+}
 function sceneImage(n){
   const s=resolve(n.s)||'', t=resolve(n.t)||'';
   if(s==='PROLOGUE') return t.includes('스마트폰')||t.includes('속보')?'assets/bg/room2024_phone.webp':'assets/bg/room2024.webp';
-  if(s.startsWith('SCENE 01')) return t.includes('TV를 끈다')?'assets/bg/living_night_on.webp':'assets/bg/living_tv_on.webp';
+  if(s.startsWith('SCENE 01')) return t.includes('TV를 끈다')?'assets/bg/living_night_off.webp':'assets/bg/living_night_tv_on.webp';
   if(s.startsWith('SCENE 02')) return 'assets/bg/living_day.webp';
   if(s.startsWith('SCENE 03')) return 'assets/bg/downtown_people.webp';
   if(s.startsWith('SCENE 04')) return 'assets/bg/younghee_super_box.webp';
   if(s.startsWith('SCENE 05')) return 'assets/bg/student_protest.webp';
   if(s.startsWith('SCENE 06')) return 'assets/bg/scene06_bus.webp';
   if(s.startsWith('SCENE 07')) return (t.includes('셔터 아래')||t.includes('신발'))?'assets/bg/shutters_shoes.webp':'assets/bg/shutters.webp';
-  if(s.startsWith('SCENE 08')) return t.includes('TV를 끈다')?'assets/bg/living_night_on.webp':'assets/bg/living_tv_on.webp';
+  if(s.startsWith('SCENE 08')) return 'assets/bg/living_night_off.webp';
   if(s.startsWith('SCENE 09')) return t.includes('집을 나선')?'assets/bg/residential_morning.webp':'assets/bg/living_day.webp';
   if(s.startsWith('SCENE 10')) return 'assets/bg/residential_morning.webp';
   if(s.startsWith('SCENE 11')){ if(t.includes('밀려 나온')||t.includes('뛰'))return 'assets/bg/academy_run.webp'; if(t.includes('차량이 떠난')||t.includes('멀어'))return 'assets/bg/academy_military_back.webp'; if(t.includes('골목'))return 'assets/bg/commercial_alley.webp'; return 'assets/bg/academy_people.webp'; }
   if(s.startsWith('SCENE 12')) return 'assets/bg/commercial_alley.webp';
   if(s.startsWith('SCENE 13')){if(t.includes('안쪽으로')||t.includes('상자'))return 'assets/bg/hospital_corridor_patient.webp';if(t.includes('헤어진'))return 'assets/bg/hospital_sunset.webp';return 'assets/bg/hospital_day.webp';}
-  if(s.startsWith('SCENE 14')) return t.includes('TV를 끈')?'assets/bg/living_night_on.webp':'assets/bg/living_tv_on.webp';
+  if(s.startsWith('SCENE 14')) return t.includes('TV를 끈')?'assets/bg/living_night_off.webp':'assets/bg/living_night_tv_on.webp';
   if(s.startsWith('SCENE 15')) return t.includes('밖으로')?'assets/bg/downtown_people.webp':'assets/bg/living_day.webp';
+  // 20일 오전, 소실 전 방송국/언론사 주변에만 사용
   if(s.startsWith('SCENE 16')) return 'assets/bg/newspaper_street_day.webp';
   if(s.startsWith('SCENE 17')) return 'assets/bg/fountain_people.webp';
   if(s.startsWith('SCENE 18')) return 'assets/bg/scene18_broadcast.webp';
@@ -334,7 +483,7 @@ function sceneImage(n){
   if(s==='SCENE 19-A · 병원으로') return 'assets/bg/hospital_sunset.webp';
   if(s==='SCENE 19-B · 택시에 탄다') return 'assets/bg/vehicle_protest_taxi.webp';
   if(s.startsWith('SCENE 20')||s.startsWith('SCENE 21')) return state.route20==='hospital'?'assets/bg/vehicle_protest_hospital.webp':'assets/bg/vehicle_protest.webp';
-  if(s.startsWith('SCENE 22')) return s.includes('집')?'assets/bg/living_night_on.webp':'assets/bg/residential_night.webp';
+  if(s.startsWith('SCENE 22')) return s.includes('집')?'assets/bg/living_night_tv_on.webp':'assets/bg/residential_night.webp';
   if(s.startsWith('SCENE 23')) return 'assets/bg/living_day.webp';
   if(s.startsWith('SCENE 24')) return 'assets/bg/protest21.webp';
   if(s.startsWith('SCENE 25')) return 'assets/bg/protest21_cart.webp';
@@ -342,7 +491,7 @@ function sceneImage(n){
   if(s.startsWith('SCENE 28')||s.startsWith('SCENE 29')) return 'assets/bg/scene28_hide.webp';
   if(s.startsWith('SCENE 30')) return s.includes('밖')?'assets/bg/hospital_day.webp':'assets/bg/hospital_many.webp';
   if(s.startsWith('SCENE 31')||s.startsWith('SCENE 32')||s.startsWith('SCENE 33')||s.startsWith('SCENE 34')) return 'assets/bg/downtown_people.webp';
-  if(s.startsWith('SCENE 35')) return 'assets/bg/deulbul.webp';
+  if(s.startsWith('SCENE 35')) return 'assets/bg/leaflet_handoff.webp';
   if(s.startsWith('SCENE 36')) return t.includes('이불')?'assets/bg/living_blanket_on.webp':(t.includes('전화도')?'assets/bg/living_blanket_off.webp':'assets/bg/living_night_on.webp');
   if(s.startsWith('SCENE 37')) return 'assets/bg/living_blanket_on.webp';
   if(s.startsWith('SCENE 38')) return 'assets/bg/younghee_super_water.webp';
@@ -352,34 +501,88 @@ function sceneImage(n){
   if(s.startsWith('SCENE 42-A')) return 'assets/bg/kitchen_light.webp';
   if(s.startsWith('SCENE 42-B')) return 'assets/bg/blood_donation.webp';
   if(s.startsWith('SCENE 44')) return 'assets/bg/downtown_people.webp';
-  if(s.startsWith('SCENE 45')||s.startsWith('SCENE 46')) return s.startsWith('SCENE 46')?'assets/bg/living_blanket_on.webp':'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 45')||s.startsWith('SCENE 46')) return 'assets/bg/living_blanket_on.webp';
   if(s.startsWith('SCENE 47')||s.startsWith('SCENE 48')) return 'assets/bg/ywca_final.webp';
   if(s.startsWith('SCENE 49')) return 'assets/bg/downtown_people.webp';
-  if(s.startsWith('SCENE 50-A')) return s.includes('투사회보')?'assets/bg/commercial_people.webp':'assets/bg/rally_fountain.webp';
+  if(s.startsWith('SCENE 50-A')) return 'assets/bg/commercial_people.webp';
   if(s.startsWith('SCENE 50-B')) return 'assets/bg/downtown_people.webp';
   if(s.startsWith('SCENE 51')||s.startsWith('SCENE 52')||s.startsWith('SCENE 53')) return 'assets/bg/rally_fountain.webp';
   if(s.startsWith('SCENE 54')) return 'assets/bg/living_blanket_on.webp';
-  if(s.startsWith('SCENE 55')) return 'assets/bg/downtown_people.webp';
-  if(s.startsWith('SCENE 56')) return 'assets/bg/scene19_taxis.webp';
-  if(s.startsWith('SCENE 57')) return 'assets/bg/downtown_people.webp';
+  if(s.startsWith('SCENE 55')) return 'assets/bg/scene55_cleanup.webp';
+  if(s.startsWith('SCENE 56')) return 'assets/bg/scene56_taxi_supplies.webp';
+  if(s.startsWith('SCENE 57')) return 'assets/bg/scene57_traffic_control.webp';
   if(s.startsWith('SCENE 58')||s.startsWith('SCENE 59')) return 'assets/bg/provincial_office.webp';
-  if(s.startsWith('SCENE 60')) return 'assets/bg/living_blanket_off.webp';
+  if(s.startsWith('SCENE 60')) return 'assets/bg/living_blanket_on.webp';
   if(s.startsWith('SCENE 61')||s.startsWith('SCENE 62')||s.startsWith('SCENE 63')||s.startsWith('SCENE 64')||s.startsWith('SCENE 65')) return s.startsWith('SCENE 64-A')?'assets/bg/younghee_super_people.webp':s.startsWith('SCENE 64-B')?'assets/bg/scene19_taxis.webp':s.startsWith('SCENE 64-C')?'assets/bg/hospital_sunset.webp':'assets/bg/rally_fountain.webp';
   if(s.startsWith('SCENE 66')){const a=ensureAnchor();return a==='younghee'?'assets/bg/younghee_super_sunset.webp':a==='bang'?'assets/bg/vehicle_protest_taxi.webp':a==='reporter'?'assets/bg/reporter_street.webp':a==='hyemin'?'assets/bg/hospital_sunset.webp':'assets/bg/residential_sunset_serious.webp';}
   if(s.startsWith('SCENE 67')) return 'assets/bg/living_blanket_on.webp';
-  if(s.startsWith('SCENE 68')) return 'assets/bg/downtown_people.webp';
-  if(s.startsWith('SCENE 69')){if(t.includes('철수')||t.includes('물러'))return 'assets/bg/march_death_2.webp';if(t.includes('다시 나타')||t.includes('또 온다'))return 'assets/bg/march_death_3.webp';return 'assets/bg/march_death_1.webp';}
-  if(s.startsWith('SCENE 70')||s.startsWith('SCENE 71')||s.startsWith('SCENE 72')||s.startsWith('SCENE 73')||s.startsWith('SCENE 74')) return 'assets/bg/rally_fountain.webp';
-  if(s.startsWith('SCENE 75')||s.startsWith('SCENE 76')||s.startsWith('SCENE 77')||s.startsWith('SCENE 78')) return state.finalAway?(ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_out.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/downtown_people.webp'):'assets/bg/living_blanket_off.webp';
-  if(s.startsWith('SCENE 79')||s.startsWith('SCENE 80')||s.startsWith('SCENE 81')||s.startsWith('SCENE 82')||s.startsWith('SCENE 83')||s.startsWith('SCENE 84')) return state.finalAway?(ensureAnchor()==='reporter'?'assets/bg/27_reporter_in.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':'assets/bg/downtown_people.webp'):'assets/bg/living_blanket_off.webp';
-  if(s.startsWith('EPILOGUE')) return 'assets/bg/newspaper_street_day.webp';
+  if(s.startsWith('SCENE 68')) return 'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 69')){if(t.includes('한참 뒤 장갑차')||t.includes('물러간다')||t.includes('박수가')||t.includes('바로 흩어지지'))return 'assets/bg/march_death_2.webp';if(t.includes('사람들이 하나둘 고개')||t.includes('다시 나타')||t.includes('또 온다'))return 'assets/bg/march_death_3.webp';return 'assets/bg/march_death_1.webp';}
+  if(s.startsWith('SCENE 70')||s.startsWith('SCENE 71')) return 'assets/bg/rally_fountain.webp';
+  if(s.startsWith('SCENE 72')) return 'assets/bg/reporter_street.webp';
+  if(s.startsWith('SCENE 73')||s.startsWith('SCENE 74')) return 'assets/bg/provincial_office.webp';
+  if(s.startsWith('SCENE 75')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_out.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/living_blanket_on.webp'):'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 76')||s.startsWith('SCENE 77')||s.startsWith('SCENE 78')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_out.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/downtown_people.webp'):'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 79')||s.startsWith('SCENE 80')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_in.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/downtown_people.webp'):'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 81')||s.startsWith('SCENE 82')||s.startsWith('SCENE 83')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_in.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/downtown_people.webp'):'assets/bg/27_home_dawn.webp';
+  if(s.startsWith('SCENE 84')) return 'assets/bg/27_home_dawn.webp';
+  if(s.startsWith('EPILOGUE')) return 'assets/bg/epilogue_newspapers.webp';
   return BG[resolve(n.b)]||'';
 }
+
+const supportUsed=new Set();
+function supportingSprite(n){
+  const s=resolve(n.s)||'', p=resolve(n.p)||'', t=resolve(n.t)||'';
+  const candidates=[];
+  const push=(path,label)=>candidates.push({path,label});
+  if(p==='다른 택시 기사')push('assets/chars/03_other_taxi_driver.webp',p);
+  if(p==='학생')push('assets/chars/04_student_male_A.webp',p);
+  if(p==='여학생')push('assets/chars/05_student_female_B.webp',p);
+  if(p==='젊은 남자')push('assets/chars/06_young_civilian_male.webp',p);
+  if(p==='중년 여성')push('assets/chars/07_middleaged_civilian_female.webp',p);
+  if(p==='중년 남성')push('assets/chars/08_middleaged_civilian_male.webp',p);
+  if(p==='다른 간호사')push('assets/chars/10_other_nurse.webp',p);
+  if(p==='병원 직원')push('assets/chars/11_hospital_support_worker.webp',p);
+  if(s.startsWith('SCENE 30')&&t.includes('입구부터'))push('assets/chars/12_injured_young_male_A.webp','부상자');
+  if(s.startsWith('SCENE 30')&&t.includes('새로 들어온 이름'))push('assets/chars/13_injured_middleaged_female_B.webp','부상자');
+  if(s.startsWith('SCENE 49')&&(t.includes('이름')||p==='시민'))push('assets/chars/14_searching_family_woman.webp','가족을 찾는 시민');
+  if(s.startsWith('SCENE 47'))push('assets/chars/15_ywca_worker_A.webp','자원봉사자');
+  if(s.startsWith('SCENE 48'))push('assets/chars/16_ywca_worker_B.webp','자원봉사자');
+  if(p==='가두방송 여성')push('assets/chars/17_street_broadcast_woman.webp',p);
+  if(s.startsWith('SCENE 18')&&t.includes('방송 차량이 지나간다'))push('assets/chars/18_broadcast_vehicle_driver.webp','방송차 운전자');
+  if(p==='사회자')push('assets/chars/19_rally_emcee.webp',p);
+  if(p==='낭독자')push('assets/chars/20_declaration_reader.webp',p);
+  if(s.startsWith('SCENE 33')&&t.includes('총을 든 시민들이'))push('assets/chars/21_armed_citizen_A.webp','시민');
+  if(s.startsWith('SCENE 33')&&t.includes('총구를 아래로'))push('assets/chars/22_armed_citizen_B.webp','시민');
+  if(s.startsWith('SCENE 57'))push('assets/chars/24_traffic_control_citizen.webp','교통 안내 시민');
+  if(s.startsWith('SCENE 69')&&t.includes('수습대책위원들이 모인다'))push('assets/chars/25_committee_member_A.webp','수습대책위원');
+  if(s.startsWith('SCENE 69')&&t.includes('총을 들고 있지 않다'))push('assets/chars/25_committee_member_B.webp','수습대책위원');
+  if(s.startsWith('SCENE 69')&&t.includes('군 쪽 사람들과'))push('assets/chars/25_committee_member_C.webp','수습대책위원');
+  if(s.startsWith('SCENE 42-A')&&t.includes('주먹밥'))push('assets/chars/30_cooking_volunteer_A.webp','취사 봉사자');
+  if(s.startsWith('SCENE 42-A')&&t.includes('솥'))push('assets/chars/30_cooking_volunteer_B.webp','취사 봉사자');
+  if(s.startsWith('EPILOGUE')&&p==='시민')push('assets/chars/32_newspaper_reader.webp','신문을 읽는 시민');
+  if((p==='시민'||p==='다른 시민')&&s.startsWith('SCENE 40'))push('assets/chars/23_unarmed_citizen.webp',p);
+  for(const c of candidates){if(!supportUsed.has(c.path)){supportUsed.add(c.path);return c}}
+  return null;
+}
 function updateSprite(n){
-  const p=resolve(n.p)||''; let key=p;
-  if(p.includes('연 기자')) key='연 기자'; else if(p.includes('방 기사')) key='방 기사'; else if(p.includes('민재')) key='민재'; else if(p.includes('혜민')) key='혜민'; else if(p.includes('영희')) key='영희';
-  const path=CHAR[key];
-  if(!path||key==='뉴스 앵커'||key==='계엄군 방송'){sprite.classList.remove('show');spriteImg.removeAttribute('src');spriteImg.alt='';return}
+  const p=resolve(n.p)||'';
+  let path='', key=p;
+  // 핵심 NPC는 이름을 알기 전에도 같은 인물의 일러스트를 쓴다.
+  if(p==='청년'||p.includes('민재')){path=CHAR['민재'];key='민재'}
+  else if(p==='가게 주인'||p.includes('영희')){path=CHAR['영희'];key='영희'}
+  else if(p==='기자'||p.includes('연 기자')){path=CHAR['연 기자'];key='연 기자'}
+  else if(p==='간호사'||p.includes('혜민')){path=CHAR['혜민'];key='혜민'}
+  else if(p.includes('방 기사')){path=CHAR['방 기사'];key='방 기사'}
+  else if(p==='어머니'){path=CHAR['어머니'];key='어머니'}
+  else if(p==='아버지'){path=CHAR['아버지'];key='아버지'}
+  else {
+    const sup=supportingSprite(n);
+    if(sup){path=sup.path;key=sup.label}
+  }
+  if(!path||p==='뉴스 앵커'||p==='계엄군 방송'){
+    sprite.classList.remove('show');spriteImg.removeAttribute('src');spriteImg.alt='';return;
+  }
   spriteImg.src=path;spriteImg.alt=key;sprite.classList.add('show');
 }
 function soundIcon(){soundBtn.setAttribute('aria-pressed',soundOn?'true':'false');soundBtn.innerHTML=soundOn?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10H4z"></path><path d="M16 9c1.4 1.6 1.4 4.4 0 6M18.5 6.5c3 3 3 8 0 11"></path></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10H4z"></path><path d="M17 10l4 4M21 10l-4 4"></path></svg>';}
@@ -428,43 +631,27 @@ function ensureAnchor(){
   return state.anchor;
 }
 
-/* ---------- 합성 효과음 ---------- */
+/* ---------- UI 피드백 + 실제 장면 효과음 ---------- */
 function audio(){
   if(!soundOn) return null;
   if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
   if(ctx.state === 'suspended') ctx.resume();
   return ctx;
 }
-function tone(f,d=.1,g=.025,type='sine',delay=0){
-  const c=audio(); if(!c) return;
-  let o=c.createOscillator(), v=c.createGain();
-  o.type=type;o.frequency.value=f;
-  v.gain.setValueAtTime(.0001,c.currentTime+delay);
-  v.gain.linearRampToValueAtTime(g,c.currentTime+delay+.01);
-  v.gain.exponentialRampToValueAtTime(.0001,c.currentTime+delay+d);
-  o.connect(v).connect(c.destination);o.start(c.currentTime+delay);o.stop(c.currentTime+delay+d+.03);
-}
-function click(){tone(560,.035,.018,'triangle')}
-function horn(){tone(235,.38,.052,'sawtooth');tone(190,.38,.038,'sawtooth',.02)}
-function shot(){
-  const c=audio(); if(c){
-    let b=c.createBuffer(1,c.sampleRate*.18,c.sampleRate),d=b.getChannelData(0);
-    for(let k=0;k<d.length;k++) d[k]=(Math.random()*2-1)*Math.pow(1-k/d.length,4);
-    let s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();
-    f.type='lowpass';f.frequency.value=1000;g.gain.value=.19;
-    s.buffer=b;s.connect(f).connect(g).connect(c.destination);s.start();
-  }
-  game.classList.remove('shake'); void game.offsetWidth; game.classList.add('shake');
-}
-function burst(){shot();setTimeout(shot,170);setTimeout(shot,310)}
-function stat(){
+function tone(f,d=.06,g=.012,type='triangle'){
   const c=audio(); if(!c)return;
-  let b=c.createBuffer(1,c.sampleRate*.8,c.sampleRate),d=b.getChannelData(0);
-  for(let k=0;k<d.length;k++) d[k]=(Math.random()*2-1)*.18;
-  let s=c.createBufferSource(),g=c.createGain();g.gain.value=.14;
-  s.buffer=b;s.connect(g).connect(c.destination);s.start();
+  const o=c.createOscillator(),v=c.createGain();o.type=type;o.frequency.value=f;
+  v.gain.setValueAtTime(.0001,c.currentTime);v.gain.linearRampToValueAtTime(g,c.currentTime+.008);
+  v.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);
+  o.connect(v).connect(c.destination);o.start();o.stop(c.currentTime+d+.02);
 }
-function engine(){tone(82,.9,.042,'sawtooth');tone(64,.9,.03,'triangle',.03)}
+function click(){tone(560)}
+function shake(){game.classList.remove('shake');void game.offsetWidth;game.classList.add('shake')}
+function horn(){playFile('horn',{volume:.95})}
+function shot(){playFile('farShot',{volume:.96});shake()}
+function burst(){playFile('closeShot',{volume:1});setTimeout(()=>playFile('closeShot',{volume:.92}),230);shake()}
+function stat(){playFile('radioStatic',{volume:.78})}
+function engine(){playFile('engine',{volume:.90})}
 
 /* ---------- 노드 ---------- */
 const L=(d,s,b,p,t,o={})=>({type:'l',d,s,b,p,t,...o});
@@ -1817,12 +2004,32 @@ E()
 ];
 
 /* ---------- 렌더링 ---------- */
-function setbg(c,img=''){const cls=resolve(c)||'black';bg.className='bg '+cls;const path=img||BG[cls]||'';bg.style.backgroundImage=path?`url("${path}")`:'';}
+let currentBgPath='';
+function setbg(c,img=''){
+  const cls=resolve(c)||'black', path=img||BG[cls]||'';
+  const dawn=/SCENE (81|82|83|84)/.test(scene.textContent||'');
+  bg.className='bg '+cls+(dawn?' dawn-tone':'');
+  if(path!==currentBgPath){
+    currentBgPath=path;
+    bg.style.backgroundImage=path?`url("${path}")`:'';
+    bg.classList.remove('bg-swap');void bg.offsetWidth;bg.classList.add('bg-swap');
+  }
+}
+function updateCinematic(n){
+  const ss=resolve(n.s)||'', tt=resolve(n.t)||'';
+  const active=ss.startsWith('SCENE 27')&&!!n.auto;
+  game.classList.toggle('auto-cinematic',active);
+  if(active&&(tt==='탕.'||tt.includes('총성이 연달아')||tt.includes('다시 총성'))){
+    impactveil.classList.remove('flash');void impactveil.offsetWidth;impactveil.classList.add('flash');
+  }else if(!active){impactveil.classList.remove('flash')}
+}
 function common(n){
   date.textContent=resolve(n.d)||'';
   scene.textContent=resolve(n.s)||'';
   setbg(n.b,sceneImage(n));wm.textContent=resolve(n.m)||'';sub.textContent=resolve(n.u)||'';
   updateSprite(n);
+  updateCinematic(n);
+  syncSceneAudio(n);
 }
 function addHistory(n){
   const t=resolve(n.t); if(!t) return;
@@ -1858,8 +2065,98 @@ function applyReveal(key){
   if(key==='bang')state.bangKnown=true;
 }
 function fx(n){
-  const ss=resolve(n.s)||'', pp=resolve(n.p)||'';
-  if(soundOn && !martialPlayed && ss.startsWith('SCENE 01') && pp==='뉴스 앵커'){martialPlayed=true;try{martialAudio.currentTime=0;martialAudio.play();}catch(e){}}
+  const ss=resolve(n.s)||'', pp=resolve(n.p)||'', tt=resolve(n.t)||'';
+
+  if(soundOn && !martialPlayed && ss.startsWith('SCENE 01') && pp==='뉴스 앵커'){
+    martialPlayed=true;playVoiceOnce('martial-law','martial',{volume:1});
+  }
+
+  if(ss.startsWith('SCENE 06')){
+    if(tt.startsWith('구호.')){playFile('horn',{volume:.88});setTimeout(()=>playFile('glass',{volume:.95}),900)}
+    if(tt.includes('버스 한 대가 급하게 멈춰'))playFile('engine',{volume:.72});
+    if(tt.includes('셔터가 올라간다'))playFile('shutter',{volume:.98});
+  }
+  if(ss.startsWith('SCENE 07')&&tt.includes('군홧발'))playFile('boots',{volume:.92});
+
+  if(ss.startsWith('SCENE 11')&&tt.includes('문이 열린다')){playFile('door',{volume:.86});setTimeout(()=>playFile('running',{volume:.94}),350)}
+  if(ss.startsWith('SCENE 12')&&(tt.includes('수첩')||tt.includes('적는다')||tt.includes('적힌다')))playFile('writing',{volume:.72});
+  if(ss.startsWith('SCENE 13')&&tt.includes('상자'))playFile('box',{volume:.72});
+  if(ss.startsWith('SCENE 14')&&tt.includes('채널 손잡이'))playFile('radioTune',{volume:.70});
+
+  if(ss.startsWith('SCENE 18')&&tt.includes('방송 차량이 지나간다')){
+    const a=playVoiceOnce('0519-street','v0519',{volume:1});lockToAudio(a,n);
+  }
+  if(ss.startsWith('SCENE 21')&&tt.includes('박수가 번진다'))playFile('applause',{volume:.62});
+  if(ss.startsWith('SCENE 22')&&n.fx==='shot')shot();
+
+  if(ss.startsWith('SCENE 26')&&tt.includes('헬기에서 방송')){
+    playVoiceOnce('0521-heli','v0521heli',{volume:.95});
+  }
+  if(ss.startsWith('SCENE 27')){
+    if(tt.includes('스피커에서 잡음')){playFile('micNoise',{volume:.85});setTimeout(()=>playFile('radioStatic',{volume:.72}),300)}
+    if(tt==='탕.'){
+      if(!playedAudio.has('0521-mass-fire')){
+        playedAudio.add('0521-mass-fire');criticalAudio=playFile('massFire21',{volume:1});shake();
+      }
+      return;
+    }
+    if(tt.includes('총성이 연달아')){shake();return}
+    if(tt.includes('유리 깨지는'))playFile('glass',{volume:1});
+    if(tt.includes('뛰어요')||tt.includes('몇 걸음 뛰다가'))playFile('running',{volume:1});
+    if(tt.includes('다시 총성')){playFile('closeShot',{volume:.92});shake();return}
+  }
+  if(ss.startsWith('SCENE 29')&&tt.includes('멀리서 다시 총성'))playFile('farShot',{volume:.9});
+
+  if(ss.startsWith('SCENE 36')){
+    if(tt.includes('수화기를 귀에 댄')){playFile('phonePickup',{volume:.85});setTimeout(()=>playFile('phoneNoise',{volume:.72}),300)}
+    if(tt.includes('천천히 내려놓는다'))playFile('phoneDown',{volume:.82});
+    if(tt.includes('다시 수화기를 든다')){playFile('phonePickup',{volume:.9});setTimeout(()=>playFile('phoneDial',{volume:.70}),450)}
+  }
+
+  if(ss.startsWith('SCENE 39')){
+    if(tt.includes('엔진 소리가'))playFile('engine',{volume:.78});
+    if(tt.includes('헌혈을 부탁'))playVoiceOnce('0522-blood','v0522blood',{volume:1});
+  }
+
+  if(ss.startsWith('SCENE 46')&&tt.includes('빗자루 끄는 소리')){
+    playFile('sweeping',{volume:.76});setTimeout(()=>playFile('engine',{volume:.52}),500)
+  }
+  if(ss.startsWith('SCENE 46')&&tt.includes('멀리서 확성기 소리'))playVoiceOnce('0523-guide','v0523guide',{volume:.9});
+  if((ss.startsWith('SCENE 48')||ss.startsWith('SCENE 50-A'))&&(tt.includes('종이')||tt.includes('묶음')))playFile('paper',{volume:.72});
+  if(ss.startsWith('SCENE 51')&&tt.includes('큰 군중이 모인다'))playVoiceOnce('rally-23','rallyVoice',{volume:.88});
+
+  if(ss.startsWith('SCENE 65')){
+    if(tt.includes('궐기대회가 열린다'))playVoiceOnce('rally-25','rallyVoice',{volume:.92});
+    if(tt.includes('박수를 친다'))playFile('applause',{volume:.9});
+  }
+
+  if(ss.startsWith('SCENE 69')&&n.fx==='engine'){playFile('tank',{volume:.95});return}
+  if(ss.startsWith('SCENE 71')&&tt.includes('마지막 궐기대회가 이어진다'))playVoiceOnce('0526-street','v0526',{volume:.92});
+
+  if(ss.startsWith('SCENE 77')&&n.fx==='burst'){
+    stopCritical();criticalAudio=playFile('gunfire27',{volume:.86,start:0});shake();return;
+  }
+  if(ss.startsWith('SCENE 78')&&tt.includes('확성기에서 다급한 목소리')){
+    stopCritical();playFile('micNoise',{volume:.85});
+    playVoiceOnce('0527-student','v0527student',{volume:1});
+    return;
+  }
+  if(ss.startsWith('SCENE 78')&&tt.includes('여성의 목소리가 반복해서')){
+    playVoiceSequence(['citizen1','citizen2','citizen3']);
+  }
+  if(ss.startsWith('SCENE 80')&&n.fx==='burst'){
+    stopCritical();criticalAudio=playFile('gunfire27',{volume:.82,start:8});shake();return;
+  }
+  if(ss.startsWith('SCENE 81')&&tt.includes('총성이 뜸해진다'))stopCritical();
+  if(ss.startsWith('SCENE 82')&&tt.includes('확성기가 다시 켜진다')){
+    stopCritical();playFile('micNoise',{volume:.82});setTimeout(()=>playFile('radioStatic',{volume:.62}),350);return;
+  }
+  if(ss.startsWith('SCENE 82')&&pp==='계엄군 방송'){
+    const a=playVoiceOnce('0527-military','v0527military',{volume:1});
+    if(a)lockToAudio(a,n);
+    return;
+  }
+
   if(n.fx==='horn')horn();
   if(n.fx==='shot')shot();
   if(n.fx==='burst')burst();
@@ -1872,6 +2169,7 @@ function render(){
     n.fn&&n.fn();advanceNode();render();return;
   }
   if(n.type==='p'){
+    game.classList.remove('auto-cinematic');impactveil.classList.remove('flash');
     sprite.classList.remove('show');
     locked=true;dialog.style.display='none';choices.style.display='none';nextMark.style.display='none';setbg(n.b);
     speaker.textContent='';text.textContent='';
@@ -1888,6 +2186,7 @@ function render(){
       locked=true;setTimeout(()=>{advanceNode();render()},n.auto);
     }
   } else if(n.type==='c'){
+    game.classList.remove('auto-cinematic');impactveil.classList.remove('flash');
     common(n);sprite.classList.remove('show');dialog.style.display='none';choices.innerHTML='';nextMark.style.display='none';
     const arr=resolve(n.a)||[];
     for(const a of arr){
@@ -1905,12 +2204,12 @@ function render(){
     }
     choices.style.display='flex';
   } else if(n.type==='t'){
-    sprite.classList.remove('show');
-    locked=true;dialog.style.display='none';choices.style.display='none';nextMark.style.display='none';setbg(n.b);wm.textContent='';sub.textContent='';
-    cardBig.textContent=resolve(n.big);cardSmall.textContent=resolve(n.small);card.style.display='flex';
-    setTimeout(()=>{card.style.display='none';advanceNode();render()},1150);
+    // 날짜/챕터 전환 카드는 띄우지 않고 다음 장면으로 바로 이어간다.
+    game.classList.remove('auto-cinematic');impactveil.classList.remove('flash');card.style.display='none';
+    advanceNode();render();return;
   } else if(n.type==='e'){
-    dialog.style.display='none';choices.style.display='none';nextMark.style.display='none';setbg('black');date.textContent=scene.textContent=wm.textContent=sub.textContent='';locked=true;showEnding();
+    game.classList.remove('auto-cinematic');impactveil.classList.remove('flash');
+    stopAllStoryAudio();dialog.style.display='none';choices.style.display='none';nextMark.style.display='none';setbg('black');date.textContent=scene.textContent=wm.textContent=sub.textContent='';locked=true;showEnding();
   }
 }
 function next(){
@@ -1944,11 +2243,30 @@ function showRecordIntro(){
   $('#recordStart').onclick=()=>showRecord(0);
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function recordContext(title){
+  const m={
+    '민재와 겹쳐 보이는 기록':{fact:'도청과 병원, 상무관 주변에는 사망자·부상자·실종자의 이름을 확인하려는 사람들이 계속 오갔다. 확인된 이름과 인상착의가 기록됐고, 혼란 속에서 신원 확인이 잘못되는 일도 있었다.',recon:'민재는 여러 기록을 참고해 만든 재구성 인물이다. 아래 기록은 민재 개인의 실제 모델이 아니라 당시 비슷한 자리에서 사람을 찾던 이들의 기록을 가리킨다.'},
+    '밥을 짓고 나르던 사람들':{fact:'계엄군이 도심에서 물러난 뒤 도청 취사 공간과 시장을 중심으로 시민들이 쌀·김치·주먹밥 등을 모아 나눴다. 외곽의 경계 지점에도 음식이 보내졌다.',recon:'영희는 여러 기록을 바탕으로 만든 재구성 인물이다. 아래 기록은 영희 개인이 아니라 당시 음식을 만들고 나르던 실제 시민들의 기록을 가리킨다.'},
+    '차량과 가두방송':{fact:'차량 시위와 이후의 차량 이동에는 버스·트럭·택시 등이 참여했고, 사람·물품·의료 물자를 옮기거나 방송을 하는 데에도 차량이 쓰였다.',recon:'방 기사는 여러 기록을 바탕으로 만든 재구성 인물이다. 아래 기록은 방 기사 개인이 아니라 당시 길 위에서 움직였던 실제 운전자와 방송 활동 기록을 가리킨다.'},
+    '적고 찍은 사람들':{fact:'당시 광주 주재 기자들은 취재수첩과 필름을 남겼다. 현장에서 바로 보도되지 못한 기록과 사진도 이후 5·18의 경과를 확인하는 자료가 되었다.',recon:'연 기자는 여러 기자의 기록을 참고해 만든 재구성 인물이다. 아래 자료는 연 기자 개인의 실존 모델이 아니라 당시 기록을 남긴 실제 기자들의 자료다.'},
+    '병원에 남은 사람들':{fact:'병원 의료진과 직원들은 몰려드는 부상자를 치료했고, 시민들은 헌혈과 물품 지원에 참여했다. 부상자 이송과 치료 상황도 병원 기록과 구술로 남았다.',recon:'혜민은 여러 의료인·병원 기록을 참고해 만든 재구성 인물이다. 아래 기록은 혜민 개인이 아니라 당시 병원에 남아 있던 실제 사람들의 기록을 가리킨다.'},
+    '애국가와 집단발포':{fact:'도청 앞에 있던 일부 목격자들은 집단발포 전후 도청 쪽 스피커에서 애국가를 들었다고 증언했다.',uncertain:'애국가 방송이 의도적으로 정해진 ‘발포 신호’였는지는 확인되지 않았다.',recon:'시뮬레이션은 ‘애국가가 들렸다 → 총성이 이어졌다’는 경험만 보여주며 두 사건의 인과관계는 단정하지 않는다.'},
+    '우리는 왜 총을 들 수밖에 없었는가':{fact:'5월 25일 작성된 시민군 문서는 21일의 발포 이후 무장하게 된 배경을 시민들에게 설명한다. 같은 시기 총기 반납을 둘러싼 논쟁도 계속됐다.',recon:'시뮬레이션의 시민군·시민 대화는 당시 궐기문과 무기 회수 논쟁을 바탕으로 한 복합 재구성이다.'},
+    '맨몸으로 탱크 앞에':{fact:'오전 8시 무렵 수습대책위원들이 탱크를 몸으로 막겠다고 나섰다는 취재 기록이 남아 있다. 군 차량은 한때 뒤로 움직였고, 이후 다시 나타난 흐름도 기록돼 있다.',recon:'플레이어는 행렬에 직접 참여하지 않고 조금 떨어진 곳에서 이를 바라보는 재구성 인물이다. 대기 중 오가는 시민 대화는 상황을 이해하기 위한 재구성이다.'},
+    '마지막 새벽':{fact:'취재수첩에는 2시 30분경 농성동 쪽 총성, 3시경 계엄군 진입을 알리는 호소, 3시 30분경 시내 진입, 5시 10분경 시내 장악, 6시 이후 군의 통제방송이 이어진 흐름이 기록돼 있다.',uncertain:'당시 여성의 마지막 방송은 여러 사람이 기억하지만 회고 문구가 조금씩 달라, 시뮬레이션에서는 긴 문장을 확정된 녹취처럼 재현하지 않는다.',recon:'시뮬레이션은 시민 쪽 방송 → 총성과 진입 → 잠깐의 침묵 → 군 통제방송의 순서로 체험하게 한다.'},
+    '며칠 뒤, 밀린 신문':{fact:'신문 배달이 끊겼다가 다시 들어온 뒤, 며칠 치 신문이 한꺼번에 전달되었다는 기록이 남아 있다.',recon:'에필로그의 신문을 펼쳐 보는 플레이어와 주변 대화는 이 기록을 바탕으로 한 재구성이다.'},
+    '투사회보':{fact:'언론 통제 속에서 시민들이 등사한 투사회보가 제작·배포됐다는 기록이 남아 있다.',recon:'시뮬레이션에서는 플레이어가 제작 장소로 순간 이동하지 않고 거리에서 투사회보를 건네받거나 배포를 돕는 방식으로 재구성했다.'}
+  };
+  return m[title]||{};
+}
 function showRecord(idx){
   const cards=recordCards(), r=cards[idx];
   const imgs=(r.images||[]).map(x=>`<figure><img src="${x.src}" alt="${esc(r.title)} 관련 기록 이미지" loading="lazy"><figcaption>${esc(x.caption)}</figcaption></figure>`).join('');
   const excerpts=r.excerpts||[]; const first=excerpts[0]?`<div class="record-excerpt">${esc(excerpts[0])}</div>`:'';
-  const more=excerpts.slice(1).map(x=>`<div class="record-excerpt">${esc(x)}</div>`).join('');
+  const cx=recordContext(r.title);
+  const contextHtml=`${cx.fact?`<div class="record-label">기록에서 확인되는 사실</div><div class="record-text">${esc(cx.fact)}</div>`:''}${cx.uncertain?`<div class="record-label">확인되지 않은 부분</div><div class="record-text">${esc(cx.uncertain)}</div>`:''}${cx.recon?`<div class="record-label">시뮬레이션에서 재구성한 부분</div><div class="record-text">${esc(cx.recon)}</div>`:''}`;
+  const extraExcerpts=excerpts.slice(1).map(x=>`<div class="record-excerpt">${esc(x)}</div>`).join('');
+  const more=extraExcerpts+contextHtml;
   const note=r.note?`<div class="record-label">기록을 읽을 때</div><div class="record-text">${esc(r.note)}</div>`:'';
   end.innerHTML=`<div class="ending-scroll">
     <div class="record-progress">RECORD ${idx+1} / ${cards.length}</div>
@@ -2013,8 +2331,8 @@ function showFinalMenu(){
 function shareTexts(){
   const a=ensureAnchor(), e=endingData[state.endingType]||endingData.balanced;
   return {
-    plain:`1980년 5월, 광주에서 열흘을 보냈습니다.\n같은 시간을 지나도, 사람마다 보게 되는 장면은 달랐습니다.\n당신이라면 그날 어디에 있었을까요?\n《그날, 우리는》\n${SHARE_URL}`,
-    ending:`1980년 5월, 광주에서 열흘을 지나왔습니다.\n나의 마지막 장면은 「${e.title}」이었습니다.\n가장 오래 함께한 사람은 ${anchorDisplay[a]}였습니다.\n당신은 그 열흘 동안 누구와, 어떤 장면을 지나게 될까요?\n《그날, 우리는》\n${SHARE_URL}`
+    plain:`1980년 5월, 광주에서 열흘을 보냈습니다.\n같은 시간을 지나도, 사람마다 보게 되는 장면은 달랐습니다.\n당신이라면 그날 어디에 있었을까요?\n《그날, 우리는》`,
+    ending:`1980년 5월, 광주에서 열흘을 지나왔습니다.\n나의 마지막 장면은 「${e.title}」이었습니다.\n가장 오래 함께한 사람은 ${anchorDisplay[a]}였습니다.\n당신은 그 열흘 동안 누구와, 어떤 장면을 지나게 될까요?\n《그날, 우리는》`
   };
 }
 function showShareOptions(){
@@ -2034,15 +2352,17 @@ function showShareOptions(){
   $('#backFinal').onclick=showFinalMenu;
 }
 async function shareMessage(msg){
+  const withLink=`${msg}\n${SHARE_URL}`;
   try{
+    // Web Share에서는 URL을 별도 필드로 한 번만 넘겨 중복 표시를 막는다.
     if(navigator.share) await navigator.share({title:'그날, 우리는',text:msg,url:SHARE_URL});
-    else if(navigator.clipboard){await navigator.clipboard.writeText(msg);alert('공유 문구를 복사했습니다.');}
-    else alert(msg);
+    else if(navigator.clipboard){await navigator.clipboard.writeText(withLink);alert('공유 문구를 복사했습니다.');}
+    else alert(withLink);
   }catch(e){}
 }
 
 /* ---------- 상단 버튼 / 시작 ---------- */
-soundBtn.onclick=e=>{e.stopPropagation();soundOn=!soundOn;soundIcon();if(!soundOn){try{martialAudio.pause()}catch(err){}}else audio()};
+soundBtn.onclick=e=>{e.stopPropagation();soundOn=!soundOn;soundIcon();if(!soundOn)stopAllStoryAudio();else{audio();const n=currentNode();if(n)syncSceneAudio(n)}};
 historyBtn.onclick=e=>{e.stopPropagation();drawHistory();history.style.display='block'};
 historyClose.onclick=e=>{e.stopPropagation();history.style.display='none'};
 $('#start').onclick=()=>{cover.style.display='none';audio();soundIcon();render()};
