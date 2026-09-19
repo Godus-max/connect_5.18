@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://godus-max.github.io/connect_5.18/sitemap.xml
