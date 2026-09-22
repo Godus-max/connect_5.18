@@ -157,7 +157,7 @@ button{font:inherit}
 .card b{font-size:25px}
 .card span{font-size:11px;color:#bdb8af;letter-spacing:.12em;margin-top:7px}
 .end{z-index:70;display:none}
-.intro-screen{position:absolute;inset:0;z-index:65;background:#050607;color:#f5f1e8;display:none;align-items:center;justify-content:center;text-align:center;padding:38px 28px;cursor:pointer}.intro-inner{font-size:clamp(15px,4.1vw,18px);line-height:1.9;white-space:pre-line;word-break:keep-all;max-width:390px}.intro-inner b{font-size:1.06em}.intro-skip{position:absolute;bottom:28px;left:20px;right:20px;font-size:10px;color:#8f8a82;letter-spacing:.03em}
+.intro-screen{position:absolute;inset:0;z-index:65;background:#050607;color:#f5f1e8;display:none;align-items:center;justify-content:center;text-align:center;padding:38px 28px;cursor:pointer}.intro-inner{font-size:clamp(15px,4.1vw,18px);line-height:1.9;white-space:pre-line;word-break:keep-all;max-width:390px}.intro-inner b{font-size:1.06em}.intro-project{display:block;margin-top:1.65em;font-weight:800;font-size:1.06em}.intro-skip{position:absolute;bottom:28px;left:20px;right:20px;font-size:10px;color:#8f8a82;letter-spacing:.03em}
 .end h2{font-size:25px;margin:0 0 12px}
 .end p{font-size:13px;line-height:1.8;color:#c8c1b8}
 
@@ -347,6 +347,7 @@ let lastScene='', martialPlayed=false, completionTracked=false;
 
 /* ---------- 실제 녹음·효과음 ---------- */
 const AUDIO_SRC={
+  phoneVibrate:'assets/audio/sfx_phone_vibration.mp3',
   martial:'assets/audio/voice_martial_tv.mp3',
   v0519:'assets/audio/voice_0519_street_short_echo.mp3',
   v0521heli:'assets/audio/voice_0521_heli_muffled.mp3',
@@ -474,7 +475,8 @@ function syncSceneAudio(n){
   if(!soundOn){setAmbient(null);setOverlay(null);return}
   const s=resolve(n.s)||'';
   let amb=null,vol=.30;
-  if(/^SCENE 0[67]/.test(s)){amb='demo';vol=.28}
+  if(s.startsWith('SCENE 06')){amb='demo';vol=.28}
+  else if(s.startsWith('SCENE 07')){amb=null}
   else if(s.startsWith('SCENE 15')||s.startsWith('SCENE 22')||s.startsWith('SCENE 36')||s.startsWith('SCENE 45')||s.startsWith('SCENE 54')||s.startsWith('SCENE 67')||s.startsWith('SCENE 68')){amb=null}
   else if(s.startsWith('SCENE 13')||s.startsWith('SCENE 30')||s.startsWith('SCENE 42-B')){amb='hospital';vol=.26}
   else if(s.startsWith('SCENE 16')||s.startsWith('SCENE 18')||s.startsWith('SCENE 20')||s.startsWith('SCENE 21')||s.startsWith('SCENE 31')||s.startsWith('SCENE 32')||s.startsWith('SCENE 33')||s.startsWith('SCENE 34')||s.startsWith('SCENE 44')||s.startsWith('SCENE 49')||s.startsWith('SCENE 50')||s.startsWith('SCENE 51')||s.startsWith('SCENE 52')||s.startsWith('SCENE 53')||s.startsWith('SCENE 55')||s.startsWith('SCENE 56')||s.startsWith('SCENE 57')||s.startsWith('SCENE 61')||s.startsWith('SCENE 62')||s.startsWith('SCENE 63')||s.startsWith('SCENE 64')||s.startsWith('SCENE 65')||s.startsWith('SCENE 70')||s.startsWith('SCENE 71')||s.startsWith('SCENE 72')||s.startsWith('SCENE 73')||s.startsWith('SCENE 74')){amb='city';vol=.22}
@@ -586,7 +588,7 @@ function supportingSprite(n){
   const one=(path,label=p)=>({path,label});
   if(s.startsWith('SCENE 04')&&p==='지나가던 이웃')return one('assets/chars/07_middleaged_civilian_female.webp');
   if(s.startsWith('SCENE 06')&&p==='시민'&&t.includes('학생 아니에요'))return one('assets/chars/06_young_civilian_male.webp');
-  if(s.startsWith('SCENE 06')&&p==='시민'&&t.includes('사람을 왜 그렇게'))return one('assets/chars/25_committee_member_B.webp');
+  if(s.startsWith('SCENE 06')&&p==='시민'&&t.includes('사람을 왜 그렇게'))return one('assets/chars/25_committee_member_C.webp');
   if(s.startsWith('SCENE 06')&&p==='가게 안 시민')return one('assets/chars/08_middleaged_civilian_male.webp');
   if(s==='SCENE 19 · 방 기사'&&p==='다른 기사')return one('assets/chars/03_other_taxi_driver.webp');
   if(s.startsWith('SCENE 29-A')&&p==='시민')return one('assets/chars/19_rally_emcee.webp');
@@ -2238,6 +2240,8 @@ function applyReveal(key){
 function fx(n){
   const ss=resolve(n.s)||'', pp=resolve(n.p)||'', tt=resolve(n.t)||'';
 
+  if(ss==='PROLOGUE'&&tt.startsWith('부우웅—'))playOnce('prologue-phone-vibration','phoneVibrate',{volume:.78,stopAfter:900});
+
   if(soundOn && !martialPlayed && ss.startsWith('SCENE 01') && pp==='뉴스 앵커'){
     martialPlayed=true;playVoiceOnce('martial-law','martial',{volume:1});
   }
@@ -2509,9 +2513,7 @@ function showSources(){
 }
 function showCredits(){
   end.innerHTML=`<div class="ending-scroll"><div class="ending-kicker">CREDIT</div><h2 class="ending-title">크레딧</h2><div class="ending-body"><b>기획·제작 | 이민재</b>
-프로젝트 | 연(連)</div><div class="ending-echo credit-rule"><b>음성 참여</b> | 방예령 · 신영희 · 이민재 · 이종석 · 정혜민
-
-<b>기록 조사·발췌</b> | 방예령 · 신영희 · 이민재 · 정혜민</div><div class="end-actions"><button class="primary" id="backFinal">마지막 화면으로</button></div></div>`;
+프로젝트 | 연(連)</div><div class="ending-echo credit-rule"><div><b>음성 참여</b> | 방예령 · 신영희 · 이민재 · 이종석 · 정혜민</div><div style="margin-top:12px"><b>기록 조사·발췌</b> | 방예령 · 신영희 · 이민재 · 정혜민</div></div><div class="end-actions"><button class="primary" id="backFinal">마지막 화면으로</button></div></div>`;
   $('#backFinal').onclick=showFinalMenu;
 }
 
@@ -2580,11 +2582,11 @@ historyClose.onclick=e=>{e.stopPropagation();history.style.display='none'};
 let introStep=0,introTimer=null;
 const INTRO_PAGES=[
 `<b>이 콘텐츠는 소리와 함께 구성되어 있습니다.</b>\n\n가능하다면 소리를 켜고 시작해 주세요.\n\n소리를 끈 상태에서도 주요 상황을 이해할 수 있도록 구성되어 있습니다.\n\n<b>당신의 선택으로 역사적 사건의 결과가 바뀌지는 않습니다.</b>\n선택에 따라 만나게 되는 사람과 지나게 되는 장면이 달라집니다.`,
-`<b>5·18민주화운동 기록물은 유네스코 세계기록유산입니다.</b>\n\n이 콘텐츠는 그 기록 가운데 시민들이 남긴 성명서·선언문, 일기, 취재수첩, 증언 등\n시민 생산 기록을 중심으로 참고해 제작했습니다.\n\n이 프로젝트는 2026 청년 세계유산 지킴이 활동으로 제작되었습니다.`
+`<b>5·18민주화운동 기록물은 유네스코 세계기록유산입니다.</b>\n\n이 콘텐츠는 그 기록 가운데 시민들이 남긴 성명서·선언문, 일기, 취재수첩, 증언 등\n시민 생산 기록을 중심으로 참고해 제작했습니다.\n\n<span class="intro-project">이 프로젝트는 2026 청년 세계유산 지킴이 활동으로 제작되었습니다.</span>`
 ];
 function showIntroStep(){clearTimeout(introTimer);if(introStep>=INTRO_PAGES.length){introScreen.style.display='none';render();return}introInner.innerHTML=INTRO_PAGES[introStep];introScreen.style.display='flex';introTimer=setTimeout(()=>{introStep++;showIntroStep()},introStep===0?5200:6200)}
 introScreen.onclick=e=>{e.stopPropagation();introStep++;showIntroStep()};
-$('#start').onclick=()=>{cover.style.display='none';trackEvent('simulation_start',{version:'final_20260922_rev2'});audio();soundIcon();introStep=0;showIntroStep()};
+$('#start').onclick=()=>{cover.style.display='none';trackEvent('simulation_start',{version:'final_20260922_rev3'});audio();soundIcon();introStep=0;showIntroStep()};
 function restartGame(){location.reload()}
 soundIcon();
 window.addEventListener('keydown',e=>{
