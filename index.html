@@ -157,6 +157,7 @@ button{font:inherit}
 .card b{font-size:25px}
 .card span{font-size:11px;color:#bdb8af;letter-spacing:.12em;margin-top:7px}
 .end{z-index:70;display:none}
+.intro-screen{position:absolute;inset:0;z-index:65;background:#050607;color:#f5f1e8;display:none;align-items:center;justify-content:center;text-align:center;padding:38px 28px;cursor:pointer}.intro-inner{font-size:clamp(15px,4.1vw,18px);line-height:1.9;white-space:pre-line;word-break:keep-all;max-width:390px}.intro-inner b{font-size:1.06em}.intro-skip{position:absolute;bottom:28px;left:20px;right:20px;font-size:10px;color:#8f8a82;letter-spacing:.03em}
 .end h2{font-size:25px;margin:0 0 12px}
 .end p{font-size:13px;line-height:1.8;color:#c8c1b8}
 
@@ -254,7 +255,7 @@ button{font:inherit}
 .auto-cinematic .sprite{opacity:0!important}
 .auto-cinematic .top{opacity:.15}
 .impactveil.flash{animation:impactFlash .42s ease}
-.impact-text{position:absolute;z-index:46;left:50%;top:45%;transform:translate(-50%,-50%);width:90%;text-align:center;font-size:clamp(30px,9vw,52px);font-weight:900;letter-spacing:-.04em;text-shadow:0 3px 18px #000;opacity:0;pointer-events:none}.impact-text.show{opacity:1}
+.impact-text{position:absolute;z-index:46;left:50%;top:45%;transform:translate(-50%,-50%);width:88%;text-align:center;text-shadow:0 3px 18px #000;opacity:0;pointer-events:none;white-space:pre-line;word-break:keep-all}.impact-text.show{opacity:1}.impact-text.speech{font-size:clamp(29px,8.5vw,50px);font-weight:900;letter-spacing:-.04em}.impact-text.narration{font-size:clamp(18px,5.3vw,27px);font-weight:500;line-height:1.55;letter-spacing:-.02em}
 @keyframes impactFlash{0%{background:#fff;opacity:.98}18%{background:#fff;opacity:.86}42%{background:#000;opacity:.98}100%{background:#000;opacity:.94}}
 
 </style>
@@ -298,13 +299,16 @@ button{font:inherit}
     <div class="title">그날, 우리는</div>
     <div class="subtitle">1980년 5월, 광주에서</div>
     <div class="notice">
-      이 콘텐츠는 5·18민주화운동과 관련된 기록을 바탕으로 일부 장면을 재구성하여 제작했습니다.<br><br>
-      당신의 선택으로 역사적 사건의 결과가 바뀌지는 않습니다. 일부 등장인물과 대화는 창작 또는 복합 인물로 재구성되었습니다.<br><br>
+      1980년 5월 광주를 한 시민의 시선으로 지나며, 당시 사람들의 선택과 연대, 그리고 남겨진 기록을 이해할 수 있도록 제작한 웹 기반 선택형 시뮬레이션 콘텐츠입니다.<br><br>
       총성, 폭행, 부상 및 사망에 대한 비시각적 묘사가 포함되어 있습니다.
     </div>
     <button class="primary" id="start">시작하기</button>
-    <div class="cover-credit">제작 연(連)</div>
+    <div class="cover-credit">2026 청년 세계유산 지킴이 연(連)</div>
     <div class="fund-note">본 사업은 복권기금으로 운영됩니다.</div>
+  </div>
+  <div class="intro-screen" id="introScreen" aria-live="polite">
+    <div class="intro-inner" id="introInner"></div>
+    <div class="intro-skip">화면을 누르면 다음 안내로 넘어갑니다.</div>
   </div>
 
   <div class="end" id="end"></div>
@@ -324,6 +328,7 @@ const $ = s => document.querySelector(s);
 const game = $('#game'), bg = $('#bg'), date = $('#date'), scene = $('#scene');
 const speaker = $('#speaker'), text = $('#text'), dialog = $('#dialog'), choices = $('#choices'), nextMark = $('.next');
 const cover = $('#cover'), end = $('#end'), wm = $('#wm'), sub = $('#sub');
+const introScreen=$('#introScreen'), introInner=$('#introInner');
 const card = $('#card'), cardBig = $('#cardBig'), cardSmall = $('#cardSmall');
 const soundBtn = $('#sound'), historyBtn = $('#historyBtn'), history = $('#history');
 const historyClose = $('#historyClose'), historyList = $('#historyList');
@@ -473,7 +478,8 @@ function syncSceneAudio(n){
   else if(s.startsWith('SCENE 15')||s.startsWith('SCENE 22')||s.startsWith('SCENE 36')||s.startsWith('SCENE 45')||s.startsWith('SCENE 54')||s.startsWith('SCENE 67')||s.startsWith('SCENE 68')){amb=null}
   else if(s.startsWith('SCENE 13')||s.startsWith('SCENE 30')||s.startsWith('SCENE 42-B')){amb='hospital';vol=.26}
   else if(s.startsWith('SCENE 16')||s.startsWith('SCENE 18')||s.startsWith('SCENE 20')||s.startsWith('SCENE 21')||s.startsWith('SCENE 31')||s.startsWith('SCENE 32')||s.startsWith('SCENE 33')||s.startsWith('SCENE 34')||s.startsWith('SCENE 44')||s.startsWith('SCENE 49')||s.startsWith('SCENE 50')||s.startsWith('SCENE 51')||s.startsWith('SCENE 52')||s.startsWith('SCENE 53')||s.startsWith('SCENE 55')||s.startsWith('SCENE 56')||s.startsWith('SCENE 57')||s.startsWith('SCENE 61')||s.startsWith('SCENE 62')||s.startsWith('SCENE 63')||s.startsWith('SCENE 64')||s.startsWith('SCENE 65')||s.startsWith('SCENE 70')||s.startsWith('SCENE 71')||s.startsWith('SCENE 72')||s.startsWith('SCENE 73')||s.startsWith('SCENE 74')){amb='city';vol=.22}
-  else if(s.startsWith('SCENE 24')||s.startsWith('SCENE 25')||s.startsWith('SCENE 26')||s.startsWith('SCENE 27')||s.startsWith('SCENE 28')||s.startsWith('SCENE 29')||s.startsWith('SCENE 40')||s.startsWith('SCENE 43')||s.startsWith('SCENE 46')||s.startsWith('SCENE 47')||s.startsWith('SCENE 48')){amb='city';vol=.20}
+  else if(s.startsWith('SCENE 24')||s.startsWith('SCENE 25')||s.startsWith('SCENE 26')||s.startsWith('SCENE 27')||s.startsWith('SCENE 28')||s.startsWith('SCENE 29')||s.startsWith('SCENE 40')||s.startsWith('SCENE 43')||s.startsWith('SCENE 47')||s.startsWith('SCENE 48')){amb='city';vol=.20}
+  else if(s.startsWith('SCENE 46')){if((resolve(n.t)||'').includes('집을 나서자')||(resolve(n.t)||'').includes('소리를 따라 걷다')){amb='city';vol=.20}else amb=null}
   else if(s.startsWith('SCENE 69')){amb=null}
   else if(s.startsWith('SCENE 75')||s.startsWith('SCENE 76')||s.startsWith('SCENE 77')||s.startsWith('SCENE 78')||s.startsWith('SCENE 79')||s.startsWith('SCENE 80')||s.startsWith('SCENE 81')||s.startsWith('SCENE 82')||s.startsWith('SCENE 83')){amb=null}
   else if(/^SCENE (1[12789]|20)$/.test(s.split(' · ')[0])){amb='city';vol=.22}
@@ -483,7 +489,7 @@ function syncSceneAudio(n){
 
 function sceneImage(n){
   const s=resolve(n.s)||'', t=resolve(n.t)||'', p=resolve(n.p)||'';
-  if(s==='PROLOGUE') return t.includes('스마트폰')||t.includes('속보')?'assets/bg/room2024_phone.webp':'assets/bg/room2024.webp';
+  if(s==='PROLOGUE'){if(state.phoneRaised||t.includes('화면 위로 속보'))state.phoneRaised=true;return state.phoneRaised?'assets/bg/room2024_phone.webp':'assets/bg/room2024.webp';}
   if(s.startsWith('SCENE 01')) return t.includes('TV를 끈다')?'assets/bg/living_night_on.webp':'assets/bg/living_night_tv_on.webp';
   if(s.startsWith('SCENE 02')) return 'assets/bg/living_day.webp';
   if(s.startsWith('SCENE 03')) return 'assets/bg/downtown_people.webp';
@@ -494,7 +500,13 @@ function sceneImage(n){
   if(s.startsWith('SCENE 08')) return t.includes('대문을 열자')?'assets/bg/house_gate.webp':'assets/bg/living_night_tv_on.webp';
   if(s.startsWith('SCENE 09')) return t.includes('집을 나선')?'assets/bg/residential_morning.webp':'assets/bg/living_day.webp';
   if(s.startsWith('SCENE 10')) return 'assets/bg/residential_morning.webp';
-  if(s.startsWith('SCENE 11')){if(t.includes('차량이 떠난')||t.includes('못 봤어요')||t.includes('거기 있었는지'))return 'assets/bg/academy_military_back.webp';if(t.includes('골목을 빠져나오려는 순간'))return 'assets/bg/commercial_alley.webp';return 'assets/bg/academy_run.webp';}
+  if(s.startsWith('SCENE 11')){
+    if(t.includes('골목을 빠져나오려는 순간'))return 'assets/bg/commercial_alley.webp';
+    if(state.scene11AfterVehicle)return 'assets/bg/academy_military_back.webp';
+    if(t.includes('차량이 떠난')){state.scene11AfterVehicle=true;return 'assets/bg/academy_military_back.webp';}
+    if(state.scene11DoorOpened||t.includes('문이 열린다')){state.scene11DoorOpened=true;return 'assets/bg/academy_run.webp';}
+    return 'assets/bg/academy_people.webp';
+  }
   if(s.startsWith('SCENE 12')) return 'assets/bg/commercial_alley.webp';
   if(s.startsWith('SCENE 13')){if(t.includes('안쪽으로')||t.includes('상자'))return 'assets/bg/hospital_corridor_patient.webp';if(t.includes('헤어진'))return 'assets/bg/hospital_sunset.webp';return 'assets/bg/hospital_day.webp';}
   if(s.startsWith('SCENE 14')) return t.includes('TV를 끈')?'assets/bg/living_night_on.webp':'assets/bg/living_night_tv_on.webp';
@@ -524,9 +536,10 @@ function sceneImage(n){
   if(s.startsWith('SCENE 42-A')) return 'assets/bg/kitchen_light.webp';
   if(s.startsWith('SCENE 42-B')) return 'assets/bg/blood_donation.webp';
   if(s.startsWith('SCENE 44')) return 'assets/bg/blood_crossing.webp';
-  if(s.startsWith('SCENE 45')||s.startsWith('SCENE 46')) return s.startsWith('SCENE 46')?'assets/bg/residential_morning.webp':'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 45')) return 'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 46')) return (t.includes('집을 나서자')||t.includes('소리를 따라 걷다'))?'assets/bg/residential_morning.webp':'assets/bg/living_blanket_on.webp';
   if(s.startsWith('SCENE 47')||s.startsWith('SCENE 48')) return 'assets/bg/ywca_final.webp';
-  if(s.startsWith('SCENE 49')) return 'assets/bg/downtown_people.webp';
+  if(s.startsWith('SCENE 49')) return 'assets/bg/provincial_office.webp';
   if(s.startsWith('SCENE 50-A')) return 'assets/bg/commercial_people.webp';
   if(s.startsWith('SCENE 50-B')) return 'assets/bg/downtown_people.webp';
   if(s.startsWith('SCENE 51')||s.startsWith('SCENE 52')||s.startsWith('SCENE 53')) return 'assets/bg/rally_fountain.webp';
@@ -534,27 +547,34 @@ function sceneImage(n){
   if(s.startsWith('SCENE 55')) return 'assets/bg/scene55_cleanup.webp';
   if(s.startsWith('SCENE 56')) return 'assets/bg/scene56_taxi_supplies.webp';
   if(s.startsWith('SCENE 57')) return 'assets/bg/scene57_traffic_control.webp';
-  if(s.startsWith('SCENE 58')||s.startsWith('SCENE 59')) return 'assets/bg/provincial_office.webp';
-  if(s.startsWith('SCENE 60')) return 'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 58')||s.startsWith('SCENE 59')) return 'assets/bg/sangmugwan_1980.webp';
+  if(s.startsWith('SCENE 60')){if(state.scene60Light||t.includes('불을 작게 켜고'))state.scene60Light=true;return state.scene60Light?'assets/bg/living_blanket_on.webp':'assets/bg/living_blanket_off.webp';}
   if(s.startsWith('SCENE 61')||s.startsWith('SCENE 62')||s.startsWith('SCENE 63')||s.startsWith('SCENE 64')||s.startsWith('SCENE 65')) return s.startsWith('SCENE 64-A')?'assets/bg/younghee_super_people.webp':s.startsWith('SCENE 64-B')?'assets/bg/scene19_taxis.webp':s.startsWith('SCENE 64-C')?'assets/bg/hospital_sunset.webp':'assets/bg/rally_fountain.webp';
+  if(s==='SCENE 66 · 스쳐 지나가는 얼굴')return 'assets/bg/rally_fountain.webp';
   if(s.startsWith('SCENE 66')){const a=ensureAnchor();return a==='younghee'?'assets/bg/younghee_super_sunset.webp':a==='bang'?'assets/bg/vehicle_protest_taxi.webp':a==='reporter'?'assets/bg/reporter_street.webp':a==='hyemin'?'assets/bg/hospital_sunset.webp':'assets/bg/minjae_sunset_street.webp';}
-  if(s.startsWith('SCENE 67')) return 'assets/bg/living_blanket_on.webp';
-  if(s.startsWith('SCENE 68')) return 'assets/bg/living_blanket_on.webp';
-  if(s.startsWith('SCENE 69')){if(t.includes('한참 뒤 장갑차')||t.includes('물러간다')||t.includes('박수가')||t.includes('바로 흩어지지'))return 'assets/bg/march_death_2.webp';if(t.includes('사람들이 하나둘 고개')||t.includes('다시 나타')||t.includes('또 온다'))return 'assets/bg/march_death_3.webp';return 'assets/bg/march_death_1.webp';}
+  if(s.startsWith('SCENE 67')||s.startsWith('SCENE 68')) return 'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 69')){
+    if(state.marchPhase<2&&(t.includes('한참 뒤 장갑차')||t.includes('물러간다')))state.marchPhase=2;
+    if(state.marchPhase<3&&(t.includes('사람들이 하나둘 고개')||t.includes('다시 나타')||t.includes('또 온다')))state.marchPhase=3;
+    return state.marchPhase===3?'assets/bg/march_death_3.webp':state.marchPhase===2?'assets/bg/march_death_2.webp':'assets/bg/march_death_1.webp';
+  }
   if(s.startsWith('SCENE 70')||s.startsWith('SCENE 71')) return 'assets/bg/rally_fountain.webp';
-  if(s.startsWith('SCENE 72')) return 'assets/bg/provincial_office_sunset.webp';
-  if(s.startsWith('SCENE 73')) return 'assets/bg/provincial_office_sunset.webp';
-  if(s.startsWith('SCENE 74')){const a=ensureAnchor();return (a==='minjae'||a==='reporter')?'assets/bg/provincial_office_sunset.webp':a==='younghee'?'assets/bg/27_younghee_night.webp':a==='bang'?'assets/bg/27_bang.webp':'assets/bg/hospital_sunset.webp';}
-  if(s.startsWith('SCENE 75')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_out.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/living_blanket_on.webp'):'assets/bg/living_blanket_on.webp';
-  if(s.startsWith('SCENE 76')||s.startsWith('SCENE 77')||s.startsWith('SCENE 78')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_out.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/downtown_people.webp'):'assets/bg/living_blanket_on.webp';
-  if(s.startsWith('SCENE 79')||s.startsWith('SCENE 80')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_in.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/downtown_people.webp'):'assets/bg/living_blanket_on.webp';
-  if(s.startsWith('SCENE 83')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_out.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/downtown_people.webp'):'assets/bg/27_home_dawn.webp';
-  if(s.startsWith('SCENE 81')||s.startsWith('SCENE 82')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_in.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/downtown_people.webp'):'assets/bg/27_home_dawn.webp';
-  if(s.startsWith('SCENE 84')) return state.finalAway?(t.includes('문을 두드리자')?'assets/bg/house_gate.webp':'assets/bg/27_home_dawn.webp'):'assets/bg/27_home_dawn.webp';
+  if(s.startsWith('SCENE 72')||s.startsWith('SCENE 73')) return 'assets/bg/old_jeonnam_provincial_office_1980_sunset.webp';
+  if(s.startsWith('SCENE 74')){const a=ensureAnchor();return (a==='minjae'||a==='reporter')?'assets/bg/old_jeonnam_provincial_office_1980_sunset.webp':a==='younghee'?'assets/bg/27_younghee_night.webp':a==='bang'?'assets/bg/27_bang.webp':'assets/bg/hospital_sunset.webp';}
+  if(s.startsWith('SCENE 75')){
+    if(!state.finalAway)return 'assets/bg/living_blanket_on.webp';
+    const housePart=t.includes('신발을 신는다')||t.includes('어머니는 다시 붙잡지 않는다')||p==='아버지';
+    if(housePart)return 'assets/bg/house_gate.webp';
+    const a=ensureAnchor();return a==='younghee'?'assets/bg/27_younghee_night.webp':a==='minjae'?'assets/bg/27_minjae_night.webp':a==='bang'?'assets/bg/27_bang.webp':a==='reporter'?'assets/bg/27_reporter_out.webp':a==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/living_blanket_on.webp';
+  }
+  if(s.startsWith('SCENE 76')||s.startsWith('SCENE 77')||s.startsWith('SCENE 78')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_out.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/living_blanket_on.webp'):'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 79')||s.startsWith('SCENE 80')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_in.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/living_blanket_on.webp'):'assets/bg/living_blanket_on.webp';
+  if(s.startsWith('SCENE 81')||s.startsWith('SCENE 82')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_in.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/living_blanket_on.webp'):'assets/bg/27_home_dawn.webp';
+  if(s.startsWith('SCENE 83')) return state.finalAway?(ensureAnchor()==='younghee'?'assets/bg/27_younghee_night.webp':ensureAnchor()==='minjae'?'assets/bg/27_minjae_night.webp':ensureAnchor()==='bang'?'assets/bg/27_bang.webp':ensureAnchor()==='reporter'?'assets/bg/27_reporter_out.webp':ensureAnchor()==='hyemin'?'assets/bg/27_hyemin.webp':'assets/bg/27_home_dawn.webp'):'assets/bg/27_home_dawn.webp';
+  if(s.startsWith('SCENE 84')){if(!state.finalAway)return 'assets/bg/27_home_dawn.webp';if(t.includes('당신은 결국 집으로 향한다'))return 'assets/bg/residential_morning.webp';if(t.includes('문을 두드리자'))return 'assets/bg/house_gate.webp';return 'assets/bg/27_home_dawn.webp';}
   if(s.startsWith('EPILOGUE')) return 'assets/bg/epilogue_newspapers.webp';
   return BG[resolve(n.b)]||'';
 }
-
 
 const supportUsed=new Set();
 const genericCitizenPool=[
@@ -563,41 +583,62 @@ const genericCitizenPool=[
 function unusedCitizenSprite(){for(const path of genericCitizenPool){if(!supportUsed.has(path)){supportUsed.add(path);return {path,label:'시민'}}}return {path:'assets/chars/23_unarmed_citizen.webp',label:'시민'};}
 function supportingSprite(n){
   const s=resolve(n.s)||'', p=resolve(n.p)||'', t=resolve(n.t)||'';
-  const candidates=[];
-  const push=(path,label)=>candidates.push({path,label});
-  if(p==='다른 택시 기사')push('assets/chars/03_other_taxi_driver.webp',p);
-  if(p==='학생')push('assets/chars/04_student_male_A.webp',p);
-  if(p==='여학생')push('assets/chars/05_student_female_B.webp',p);
-  if(p==='젊은 남자')push('assets/chars/06_young_civilian_male.webp',p);
-  if(p==='중년 여성')push('assets/chars/07_middleaged_civilian_female.webp',p);
-  if(p==='중년 남성')push('assets/chars/08_middleaged_civilian_male.webp',p);
-  if(p==='다른 간호사')push('assets/chars/10_other_nurse.webp',p);
-  if(p==='병원 직원')push('assets/chars/11_hospital_support_worker.webp',p);
-  if(s.startsWith('SCENE 30')&&t.includes('입구부터'))push('assets/chars/12_injured_young_male_A.webp','부상자');
-  if(s.startsWith('SCENE 30')&&t.includes('새로 들어온 이름'))push('assets/chars/13_injured_middleaged_female_B.webp','부상자');
-  if(s.startsWith('SCENE 49')&&(t.includes('이름')||p==='시민'))push('assets/chars/14_searching_family_woman.webp','가족을 찾는 시민');
-  if(s.startsWith('SCENE 47'))push('assets/chars/15_ywca_worker_A.webp','자원봉사자');
-  if(s.startsWith('SCENE 48'))push('assets/chars/16_ywca_worker_B.webp','자원봉사자');
-  if(p==='가두방송 여성')push('assets/chars/17_street_broadcast_woman.webp',p);
-  if(s.startsWith('SCENE 18')&&t.includes('방송 차량이 지나간다'))push('assets/chars/18_broadcast_vehicle_driver.webp','방송차 운전자');
-  if(p==='사회자')push('assets/chars/19_rally_emcee.webp',p);
-  if(p==='낭독자')push('assets/chars/20_declaration_reader.webp',p);
-  if(s.startsWith('SCENE 33')&&t.includes('총을 든 시민들이'))push('assets/chars/21_armed_citizen_A.webp','시민');
-  if(s.startsWith('SCENE 33')&&t.includes('총구를 아래로'))push('assets/chars/22_armed_citizen_B.webp','시민');
-  if(s.startsWith('SCENE 57'))push('assets/chars/24_traffic_control_citizen.webp','교통 안내 시민');
-  if(s.startsWith('SCENE 69')&&t.includes('수습대책위원들이 모인다'))push('assets/chars/25_committee_member_A.webp','수습대책위원');
-  if(s.startsWith('SCENE 69')&&t.includes('총을 들고 있지 않다'))push('assets/chars/25_committee_member_B.webp','수습대책위원');
-  if(s.startsWith('SCENE 69')&&t.includes('군 쪽 사람들과'))push('assets/chars/25_committee_member_C.webp','수습대책위원');
-  if(s.startsWith('SCENE 42-A')&&t.includes('주먹밥'))push('assets/chars/30_cooking_volunteer_A.webp','취사 봉사자');
-  if(s.startsWith('SCENE 42-A')&&t.includes('솥'))push('assets/chars/30_cooking_volunteer_B.webp','취사 봉사자');
-  if(s.startsWith('EPILOGUE')&&p==='시민')push('assets/chars/32_newspaper_reader.webp','신문을 읽는 시민');
-  if((p==='시민'||p==='다른 시민')&&s.startsWith('SCENE 40'))push('assets/chars/23_unarmed_citizen.webp',p);
-  if((p==='시민'||p==='다른 시민')&&(s.startsWith('SCENE 06')||s.startsWith('SCENE 25')||s.startsWith('SCENE 27')||s.startsWith('SCENE 29')||s.startsWith('SCENE 50')||s.startsWith('SCENE 52')||s.startsWith('SCENE 69')||s.startsWith('SCENE 71')||s.startsWith('SCENE 73')))push('assets/chars/23_unarmed_citizen.webp',p);
-  if((p==='시민'||p==='다른 시민')&&(s.startsWith('SCENE 61')||s.startsWith('SCENE 62')||s.startsWith('SCENE 63')||s.startsWith('SCENE 64')||s.startsWith('SCENE 65')))push('assets/chars/21_armed_citizen_A.webp',p);
-  for(const c of candidates){if(!supportUsed.has(c.path)){supportUsed.add(c.path);return c}}
+  const one=(path,label=p)=>({path,label});
+  if(s.startsWith('SCENE 04')&&p==='지나가던 이웃')return one('assets/chars/07_middleaged_civilian_female.webp');
+  if(s.startsWith('SCENE 06')&&p==='시민'&&t.includes('학생 아니에요'))return one('assets/chars/06_young_civilian_male.webp');
+  if(s.startsWith('SCENE 06')&&p==='시민'&&t.includes('사람을 왜 그렇게'))return one('assets/chars/25_committee_member_B.webp');
+  if(s.startsWith('SCENE 06')&&p==='가게 안 시민')return one('assets/chars/08_middleaged_civilian_male.webp');
+  if(s==='SCENE 19 · 방 기사'&&p==='다른 기사')return one('assets/chars/03_other_taxi_driver.webp');
+  if(s.startsWith('SCENE 29-A')&&p==='시민')return one('assets/chars/19_rally_emcee.webp');
+  if(s.startsWith('SCENE 29-B')&&p==='시민')return one('assets/chars/16_ywca_worker_B.webp');
+  if(s.startsWith('SCENE 29-B')&&p==='다른 시민')return one('assets/chars/13_injured_middleaged_female_B.webp');
+  if(s.startsWith('SCENE 30')&&t.includes('병원 입구 한쪽에서는'))return null;
+  if(s.startsWith('SCENE 40')&&p==='학생')return one('assets/chars/04_student_male_A.webp');
+  if(s.startsWith('SCENE 40')&&p==='다른 시민')return one('assets/chars/25_committee_member_B.webp');
+  if(s.startsWith('SCENE 61')&&p==='시민 1')return one('assets/chars/07_middleaged_civilian_female.webp');
+  if(s.startsWith('SCENE 61')&&p==='시민 2')return one('assets/chars/22_armed_citizen_B.webp');
+  if(s.startsWith('SCENE 61')&&p==='다른 시민')return one('assets/chars/20_declaration_reader.webp');
+  if(s.startsWith('SCENE 61')&&p==='무장 시민')return one('assets/chars/21_armed_citizen_A.webp');
+  if(s.startsWith('SCENE 61')&&p==='총을 반납한 시민')return one('assets/chars/08_middleaged_civilian_male.webp');
+  if(s.startsWith('SCENE 69')){
+    if(t.includes('수습대책위원들이 모인다'))return one('assets/chars/25_committee_member_A.webp','수습대책위원');
+    if(!p)return null;
+    if(p==='시민'&&t.includes('저 사람들 어디'))return one('assets/chars/04_student_male_A.webp');
+    if(p==='다른 시민'&&t.includes('군이 더 들어오지'))return one('assets/chars/32_newspaper_reader.webp');
+    if(p==='시민'&&t.includes('저렇게 그냥'))return one('assets/chars/25_committee_member_C.webp');
+    if(p==='시민'&&t.includes('물러간다'))return one('assets/chars/04_student_male_A.webp');
+    if(p==='시민'&&t.includes('또 온다'))return one('assets/chars/32_newspaper_reader.webp');
+  }
+  if(s.startsWith('SCENE 71')&&p==='시민')return one('assets/chars/25_committee_member_A.webp');
+  if(s.startsWith('SCENE 71')&&p==='다른 시민'&&t.includes('어디요'))return one('assets/chars/05_student_female_B.webp');
+  if(s.startsWith('SCENE 72')&&p==='시민')return one('assets/chars/22_armed_citizen_B.webp');
+  if(s.startsWith('SCENE 72')&&p==='여성 시민')return one('assets/chars/15_ywca_worker_A.webp');
+  if(s.startsWith('SCENE 72')&&p==='학생')return one('assets/chars/23_unarmed_citizen.webp');
+  if(s.startsWith('EPILOGUE')&&p==='시민')return one('assets/chars/20_declaration_reader.webp','시민');
+  if(p==='다른 택시 기사'||p==='다른 기사')return one('assets/chars/03_other_taxi_driver.webp');
+  if(p==='학생')return one('assets/chars/04_student_male_A.webp');
+  if(p==='여학생')return one('assets/chars/05_student_female_B.webp');
+  if(p==='젊은 남자')return one('assets/chars/06_young_civilian_male.webp');
+  if(p==='중년 여성')return one('assets/chars/07_middleaged_civilian_female.webp');
+  if(p==='중년 남성')return one('assets/chars/08_middleaged_civilian_male.webp');
+  if(p==='다른 간호사')return one('assets/chars/10_other_nurse.webp');
+  if(p==='병원 직원')return one('assets/chars/11_hospital_support_worker.webp');
+  if(s.startsWith('SCENE 49')&&(t.includes('이름')||p==='시민'))return one('assets/chars/14_searching_family_woman.webp','가족을 찾는 시민');
+  if(s.startsWith('SCENE 47'))return one('assets/chars/15_ywca_worker_A.webp','자원봉사자');
+  if(s.startsWith('SCENE 48'))return one('assets/chars/16_ywca_worker_B.webp','자원봉사자');
+  if(p==='가두방송 여성')return one('assets/chars/17_street_broadcast_woman.webp');
+  if(s.startsWith('SCENE 18')&&t.includes('방송 차량이 지나간다'))return one('assets/chars/18_broadcast_vehicle_driver.webp','방송차 운전자');
+  if(p==='사회자')return one('assets/chars/19_rally_emcee.webp');
+  if(p==='낭독자')return one('assets/chars/20_declaration_reader.webp');
+  if(s.startsWith('SCENE 33')&&t.includes('총을 든 시민들이'))return one('assets/chars/21_armed_citizen_A.webp','시민');
+  if(s.startsWith('SCENE 33')&&t.includes('총구를 아래로'))return one('assets/chars/22_armed_citizen_B.webp','시민');
+  if(s.startsWith('SCENE 57'))return one('assets/chars/24_traffic_control_citizen.webp','교통 안내 시민');
+  if(s.startsWith('SCENE 42-A')&&t.includes('주먹밥'))return one('assets/chars/30_cooking_volunteer_A.webp','취사 봉사자');
+  if(s.startsWith('SCENE 42-A')&&t.includes('솥'))return one('assets/chars/30_cooking_volunteer_B.webp','취사 봉사자');
   if(p==='시민'||p==='다른 시민'||p==='여성 시민'||p==='가게 안 시민')return unusedCitizenSprite();
   return null;
 }
+
 function updateSprite(n){
   const p=resolve(n.p)||'';
   let path='', key=p;
@@ -636,7 +677,7 @@ const state = {
   traitSlots:{},
   route20:'',route22:'',route23:'',
   anchor:'',finalAway:false,finalLocation:'home',endingType:'',
-  blanketUp:false
+  blanketUp:false,phoneRaised:false,scene11DoorOpened:false,scene11AfterVehicle:false,scene60Light:false,marchPhase:1
 };
 
 function bondOnce(who,slot,points=1){
@@ -1095,21 +1136,21 @@ function anchorEcho(){
 function anchorRecord(){
   const a=ensureAnchor();
   const map={
-    minjae:{date:'5월 18일 이후',title:'이름을 찾던 사람들',source:'「10일의 기억1-15인 시민의 기억」 237~239p · 372p',excerpts:[`방기웅: 군인들은 그때까지는 전혀 못 봤죠. 딱 5월 18일 날 그때가 아마 오후 1시 2시 됐을 때였죠. 상황이 심각해진 것 같다고 보고 이제 “야, 우리 집에 가자, 집에 가자.” 하고 있는데, 어떤 어른이 두 사람한테 부축을 받아갖고 걸어오는데 머리가 깨져가지고 피를 줄줄 흘리고 있어요, 처음에는 시위대가 던진 돌에 맞은 것으로 생각했어요. 그런데 군인이 곤봉으로 때려서 그랬다는 거여요.`,`홍장희: 근데 총이 발포되는 상황은 YWCA 그 앞에 사람들이 더 진입을 하면 발포가 됐고 그 자리에 머물러 있을 때는 발포가 안 됐어요. 그 이상하게 그 선도 정해진 거고 그 선 이상을 넘어가면 발포가 되고 넘어가지 않으면 발포가 않았서 그 선이 유지된 것 같아요. 저는 서서 더 앞으로 가지 못하도록 막는 일을 했어요.`]},
-    younghee:{date:'5월 21일 이후',title:'밥을 짓고 나르던 사람들',source:'「2025 광주민중항쟁과 여성」 137~141p · 251p',excerpts:[`…21일 새벽부터 주택가의 여성을 중심으로 시위대에게 먹이고자 솥을 걸고 밥을 짓기 시작했다. 녹두서점의 정현애와 동생 정현순은 이른 아침부터 골목 여기저기에서 머리에 대야를 이거나 옆구리에 바구니를 든 여성들을 볼 수 있었다.…`,`…시내 골목에서 대야와 바구니를 들고 나타난 아주머니들이 요구르트와 김밥, 주먹밥을 시위대에게 나누어 주었다. 그 모습을 보고 시민들은 감격했다.…`,`…가마로 구입한 쌀을 방앗간(현 양동주민센터 자리)에서 쪄서 밤새 주먹밥을 만들었다. 다음날 아침, 된장국과 함께 주먹밥을 박스에 담아 유동삼거리, 도청과 전남대병원 등에 전해주었다.…`]},
-    bang:{date:'5월 20일~21일',title:'길 위의 차량들',source:'「2025 광주민중항쟁과 여성」 151p · 「구술생애사를 통해 본 5·18의 기억과 역사 12 청소년편」 134p',excerpts:[`21일의 차량시위에는 10대와 20대의 여성들이 많이 참여하였다…\n\n…차량시위에 참여한 여성들은 광주에서 자행된 계엄군의 학살 만행을 고발하고, 항쟁에 동참할 것을 호소하는 차량방송을 많이 했다는 증언이 많다…\n\n…여성들은 주로 차량시위에서 방송활동을 하였다…`,`주소연: 21일 오후부터 가두 방송을 했어요. 버스에 사람들이 몽땅 타고 화순 쪽으로 갔다가, 다시 왔다가 그러면서 몇 번 지나갔어요. 차를 타고 다니면서 “광주시민 여러분! 도청 앞으로 모여서 총궐기합시다!” 이런 말을 했던 것 같아요.`]},
-    reporter:{date:'5월 18일~27일',title:'적고 찍은 사람들',source:'「10일의 기억1-15인 시민의 기억」 30~31p · 「10일의 기억2-15인 시민의 기억」 50~53p',excerpts:[`고창옥: … 왜 이렇게 신문에 보도가 안 나가는데 하느냐? 하니까, 우리는 다 해놔야 합니다. 했다가 나중에 이것이 사실인가 아닌가를 여러 가지 자료화가 되기 때문에 확인할 수 있고 지금 날마다 보도는 안 나지만 열심히 해놔야 합니다. 그런 좋은 말을 들었습니다.`,`나경택: … 지방지는 20일 날 신문을 조금 내고는, 문을 닫아버렸습니다. 계엄당국에서는 기자들이고 전부 오라해가지고, 신문을 발행하라고 했었거든요. 다른 기자들, 윤전기를 돌리는 윤전부 직원들도 전부 광주를 빠져나갔고, 신문이 안 나왔어요. 역사는 기록 아니겠습니까? 그래서 언젠가는 광주 진실은 내 손으로 밝혀야겠다는 생각으로 저는, 숨어서 사진을, 취재를 했었던 것입니다.`]},
-    hyemin:{date:'5월 19일 이후',title:'병원에 남은 사람들',source:'「10일의 기억1-15인 시민의 기억」 152~153p · 271p',excerpts:[`박종수: 목격) 그리고 그 다음날, 그러니까 5월 19일이죠. 50대 중반인 김재수님이 가쁜 숨을 몰아쉬며 우리 치과의원으로 뛰어 들어오셨습니다. 도청 앞길을 가는데 베레모를 쓴 공수단 군인들이 무조건 붙잡아 곤봉으로 후려치더라는 것입니다. 변명이나 항의를 할 사이도 없이 일격을 당하고 보니 정신없이 달아나 우리 치과로 들어오셨다고 합니다.…`,`… 이기상 씨는 5·18민주화운동 기간에 시민들의 시신이 안치된 상무관에서 조문을 읽어주었고, 피가 부족한 사람들을 위해서 헌혈도 하였다. 그는 보건소장과 간호사와 함께 김정형 외과, 김승환 외과, 적십자 병원, 기독교병원 등을 다니면서 환자 명단을 파악하고, 부족한 의약품을 전달하는 역할도 감당했다.…`]}
+    minjae:{date:'5월 18일 이후',title:'이름을 찾던 사람들',source:'「10일의 기억1-15인 시민의 기억」 237~239p · 372p',excerpts:["방기웅","면담자: 그러면 이제 16날은 그렇게 행진이 마무리가 되고. 혹시 뭐 17일(토), 18일(일요일)은 따로 일정이 있었나요?","방기웅: 특별한 일이 없었어요. 5월 17일 날 저녁에 산수동 오거리 친구 집에 가서 TV로 미스코리아 선발대회를 보았어요. 그런데 그걸 보고 있는데 밑에 자막으로 제주도를 제외하고 전국으로 비상계엄령을 확대한다고 뜨더라고요. 왜 제주도를 제외하고 하지? 하는 그런 의문이 좀 들기도 했고. 야, 진짜로 비상계엄을 확대를 하네. 그러면 내일(18일) 전대를 가야 되는 거 아니야? 이 생각을 친구랑 하고, 그 방송 끝나고 뭐 하고 잤어요. 그리고 아침에 늦잠을 자고 전대 정문 앞으로 가려고 하다가, 이미 해산되었다고 하고, 도청 앞으로 모이기로 했다는 소문이 들리더라고요. 그래, 그러면 도청 앞으로 가자, 그래 갖고 아마 도청 앞으로 도착한 시간이 5월 18일 한 11시나 됐었을 거여요. 그런데 도청 앞에 가 봐도 시민들만 돌아다니지 학생들이 안 보였어요. 한 열 댓 명인가 스물 몇 명 모여서 “비상계엄 해체하라” “전두환은 물러가라” 구호를 외치고 있었어요. 스무 명 가까운 얘들이 보도블록을 깨고 돌멩이를 주워서 경찰에게 던지고 최루탄이 터지기 시작했어요. 그래서 이제 같이 동참했죠.","면담자: 대학생들은 얼마나 있었나요?","방기웅: 대학생들이 소수였죠. 저도 동참을 해가지고 거기서 쫓겨서 ‘금남로 5가’까지 쫓겨 갔어요. 모두가 흩어지다 시피 쫓겨 가고, 저와 친구는 터미널이나 한번 가보자 하고 갔어요. 공용터미널 쪽으로 가다가, 군인들을 보기 시작했어요. 평상시에 봤던 곤봉보다 더 큰 곤봉을 딱 들고 총도 뒤에 매고 트럭에서 줄줄이 내리는 거어요. 그래서 이제 상황이 심각해진다는 느낌이 오더만요.","면담자: 그전에 집회에서는 전혀 못 봤던…","방기웅: 군인들은 그때까지는 전혀 못 봤죠. 딱 5월 18일 날 그때가 아마 오후 1시 2시 됐을 때였죠. 상황이 심각해진 것 같다고 보고 이제 “야, 우리 집에 가자, 집에 가자.” 하고 있는데, 어떤 어른이 두 사람한테 부축을 받아갖고 걸어오는데 머리가 깨져가지고 피를 줄줄 흘리고 있어요, 처음에는 시위대가 던진 돌에 맞은 것으로 생각했어요. 그런데 군인이 곤봉으로 때려서 그랬다는 거여요. 그래서 “야 이거 골치 아프겠다” 생각이 들어서 농성동 집으로 가려고 하는데 이미 군인들이 쫙 깔려 있었어요. 군인들이 막 잡아끌고 있는 거요. 이제 끌려가면 죽겠다 싶은 생각이 들어서 친구에게 “야, 이 앞에 50미터 먼저 가. 나 50미터 뒤에 갈게” 그러고 충장로 쪽으로 건너가서 6가 쪽으로 가려고 하는데, 공수부대원이 나를 향해 달려오더라고요. 그래서 친구에게 “야 골목으로 들어가자!” 소리 지르고, 골목으로 들어가서 한참 달렸지요. 그리고 친구에게 가정으로 들어가라고 하면서 문 열린 집으로 무조건 들어갔어요.","「10일의 기억1-15인 시민의 기억」 237~239p","홍장희","홍장희는 80년 5월 호남신학대학교 3학년에 재학 중이었다.","홍장희: 근데 총이 발포되는 상황은 YWCA 그 앞에 사람들이 더 진입을 하면 발포가 됐고 그 자리에 머물러 있을 때는 발포가 안 됐어요. 그 이상하게 그 선도 정해진 거고 그 선 이상을 넘어가면 발포가 되고 넘어가지 않으면 발포가 않았서 그 선이 유지된 것 같아요. 저는 서서 더 앞으로 가지 못하도록 막는 일을 했어요.","「10일의 기억1-15인 시민의 기억」 372p","면담자: 선생님께서는 기독병원에서 주로 어떤 일을 하셨나요?","홍장희: 아, 저는 그때 당시에 굉장히 두려워하고 또 힘들어하는 사람들 옆에 있었고요. 총을 들고 온 그런 젊은이도 있었는데, 제가 총을 수거하고 그 친구를 안정시켜 주곤 했어요.","「10일의 기억2-15인 시민의 기억」 375p","면담자: 국가에 관심이 없으셨는데도 5월 17일, 18일 계속해서 참석하셨잖아요. 어떤 마음이었는지?","홍장희: 참석했어요. 데모도 참석했고 대항도 했고…","「10일의 기억1-15인 시민의 기억」 381p"]},
+    younghee:{date:'5월 21일 이후',title:'밥을 짓고 나르던 사람들',source:'「2025 광주민중항쟁과 여성」 137~141p · 251p',excerpts:["…부엌에서 잠을 자느라 미처 빠져나가지 못했던 일부 여성들은 도청에서 들리는 방송 소리에 잠에서 깨어 급하게 YWCA 옆 건물로 피했다. 그중 이남순(여,23세), 김윤희(여, 20세), 강임아(여,22세)는 다시 YWCA로 돌아왔다. 그리고 총소리가 잠잠해진 것 같아 솥에 밥을 안치고 국을 데웠다. 아침이면 시민군들에게 밥을 대주어야 한다고 생각했다.","「2025 광주민중항쟁과 여성」 251p","…21일 새벽부터 주택가의 여성을 중심으로 시위대에게 먹이고자 솥을 걸고 밥을 짓기 시작했다. 녹두서점의 정현애와 동생 정현순은 이른 아침부터 골목 여기저기에서 머리에 대야를 이거나 옆구리에 바구니를 든 여성들을 볼 수 있었다.…","…시내 골목에서 대야와 바구니를 들고 나타난 아주머니들이 요구르트와 김밥, 주먹밥을 시위대에게 나누어 주었다. 그 모습을 보고 시민들은 감격했다.…","… ”어제는 한 끼도 못 먹었어요‘’3일 만에 처음으로 밥을 먹어보네‘’나이가 들어 보이는 여성 한 분이 정현애의 손에도 주먹밥을 쥐어줬다.‘’어쨌든 일을 해도 밥을 먹으면서 해야해‘’동네 이웃끼리 모여서 학생들에게 밥이라도 먹이자고 새벽에 일어나서 만들었다‘며 어서 먹으라고 권했다.…","…’어머니, 잘 먹겠습니다‘하는 소리가 들렸다. 그 소리에 주먹밥을 만들어 나눠주던 여성이 활짝 웃었다.…","…한국은행 앞 도로에는 작은 피캣과 현수막을 든 여성들이 함지박과 양동이에 먹을 것을 잔뜩 들고 와서 시위대에게 건내주고 있었다. 주먹밥, 빵, 음료수, 담배 등이었다.…","…양동시장에서는 여성 노점상인들이 18일부터 ’계엄해제, 김대중 석방‘을 외치며 시위하다가 공수대원에게 쫒기는 학생들을 구출하는 등의 지원활동을 했다. 시위대가 배가 고프다는 말을 듣고 나채순(39), 오옥순(34세), 염길순(44세), 김정애(33), 박금옥(36), 오판심(35), 이영애(37), 강선자(33), 이성자(29) 등 양동시장 노점상 30여 명이 빵과 우유를 사서 시위대에게 전달했다.…","…가마로 구입한 쌀을 방앗간(현 양동주민센터 자리)에서 쪄서 밤새 주먹밥을 만들었다. 다음날 아침, 된장국과 함께 주먹밥을 박스에 담아 유동삼거리, 도청과 전남대병원 등에 전해주었다.…","…김경애(59)는… 같은 동네 사는 여성들에게 이야기해서 쌀을 모아 밥을 짓기 시작했다. 라면상자에 비닐을 깔고 주먹밥을 만들었다. 전남대 의대 앞으로 가서 시위차량이 지나가면 차에다 주먹밥을 올려주면서 몸조심하라고 격려했다.…","…김종희는… 집에서 만든 음식들을 가지고 나와 도청광장 시민들이 모여 있는 곳에 가져다 놓았다. 시위대 중 배고픈 사람 누구라도 먹을 수 있도록 했다.…","…표경남은 당시 부모님이 서울에 계시고, 집안에 쌀이 떨어져 동생들과 라면을 먹고 있는 신세였지만, 당연한 것으로 알고 라면을 내주었다. 동네 아주머니들은 밥과 김치를 바구니에 담아 시위대 차량들이 다니는 도로에 놓아두었다. 그리고 주먹밥과 김밥, 빵과 우유, 음료수 등도 아낌없이 내어주었다.…","「2025 광주민중항쟁과 여성」 137~141p"]},
+    bang:{date:'5월 20일~21일',title:'길 위의 차량들',source:'「2025 광주민중항쟁과 여성」 151p · 「구술생애사를 통해 본 5·18의 기억과 역사 12 청소년편」 134p',excerpts:["오늘은 민주기사의 날.","(1980년 5월 20일, 저녁 6시부터 시작된 시위는 대인시장, 서방삼거리에서 공수부대의 탱크부대와 (?)고 밀리다가 오후 3시경 금남로의 시위군중을 수만명으로 늘어났고 경찰이 최루탄, 페퍼포그를 쏘아대며 포위해오자 길바닥에 그대로 주저않자 “차라리 우리 모두를 죽여라”고 외쳐댔다. 오후 6시경 광주시내 영(?)동 택시기사 200여명이 무등경기장에 모여 “군 저지선 돌파에 앞장서겠다”고 결의. 6시 50분경 택시 200여대, 시내버스 10대, 트럭 4대가 헤드라이트를 켠 채 금남로에 도착. 시도, 실패를 거듭하다 7시 30분경 시외버스 터미널에서 버스를 몰고 온 또 다른 시위대와 합류. 대형버스 5대씩을 2열로 앞세우고 군경저지선에 밀어닥쳤다. 오후 8시반 소방차 3대 확보. 9시 20분경 광주 고속버스 10여대 저지선 돌파. 밤 10시경 광주 외곽지대에서부터 차츰 군저지선 무너뜨리고 시청접수. 공식발포로 수많은 시위대 사망. 그날의 민주기사들은 수 없이 죽어가면서도 시위대의 선봉에 서서 목숨을 걸고 차를 몰아 계엄군 속으로 뛰어들었습니다.) 민주 기사들이여! 총 봉기 합시다. 오늘 오후 5시 무등 경기장에서부터 차량시위 시작하여 7시에 도청으로 집결. 시민과 함께 집회를 갖습니다. 적극 참가하여 88명 5월 학살자 노태우 정권과 미국놈의 간담을 서늘하게 해줍시다. 민주기사 만세. 광주시민 만세. 전국의 자주, 민주, 통일 만만세","분단국 44년 5월 20일","전남대학교 총학생회","「1988년도 성명서자료」 오늘은 민주기사의 날(1988.5.20)","5월 20일 금남로에서 벌어진 2백여대 영업용 택시들의 ‘차량시위’가 발생하게 된 이유도 다르지 않았다. 그 전날 어떤 일이 벌어졌던가? “로타리 부근 전투에서 머리가 으깨지고 팔이 부러져 온통 피범벅이 된 부상자를 급히 병원으로 이송중이던 택시기사에게 공수대원이 부상자를 내려놓으라고 명령했다. 기사는 안타깝게 ‘당신이 보다시피 조금 곧 죽어가는 사람을 병원으로 운반해야 되지 않겠느냐’라고 호소하자 그 공수대원은 차의 유리창을 부수고 운전기사를 끌어내려 대검으로 무참하게 배를 찔러 살해했다. 이런 식으로 최소한 3명의 운전기사가 살해당했는데, 이는 다음날인 20일, 또 하나의 기폭제였던 ‘차량시위’의 직접적인 계기가 된다. 「한국현대사 산책 1980년대 편 광주학살과 서울 올림픽 1권」 전남사회 운동협의회 편, 황석영기록 72p","21일의 차량시위에는 10대와 20대의 여성들이 많이 참여하였다…","…차량시위에 참여한 여성들은 광주에서 자행된 계엄군의 학살 만행을 고발하고, 항쟁에 동참할 것을 호소하는 차량방송을 많이 했다는 증언이 많다…","…여성들은 주로 차량시위에서 방송활동을 하였다…","「2025 광주민중항쟁과 여성」 151p","주소연: 21일 오후부터 가두 방송을 했어요. 버스에 사람들이 몽땅 타고 화순 쪽으로 갔다가, 다시 왔다가 그러면서 몇 번 지나갔어요. 차를 타고 다니면서 “광주시민 여러분! 도청 앞으로 모여서 총궐기합시다!” 이런 말을 했던 것 같아요. 그다음 날 10시쯤 모이라고 방송했던 것 같은데… 아무튼 오전에 나오라고 했어요. 그래서 22일 아침에 전남도청으로 갔어요.","「구술생애사를 통해 본 5·18의 기억과 역사 12 청소년편」 134p"]},
+    reporter:{date:'5월 18일~27일',title:'적고 찍은 사람들',source:'「10일의 기억1-15인 시민의 기억」 30~31p · 「10일의 기억2-15인 시민의 기억」 50~53p',excerpts:["고창옥","고창옥: … 5·18 당시 그 분수대 주변에 가봤어요. 그랬더니 그 당시 사람들이 많이 모였데요. 그렇지만 취재한 것은 별로 보지 못했습니다. 평소 우리 같으면 취재의 열기가 치열했는데 그때 당시만 해도 그런 것은 없었고 순수한 사람들이 움직이는 모습이었는데 그중의 한 사람이 취재를 열렬히 했습니다. 그래서 보니까 정권조라는 사람인데 경향신문 호남 본부장 그런 직책으로 와서 하던 후배였는데 그 사람이 열렬히 취재를 해서 내가 물었습니다. 왜 이렇게 신문에 보도가 안 나가는데 하느냐? 하니까, 우리는 다 해놔야 합니다. 했다가 나중에 이것이 사실인가 아닌가를 여러 가지 자료화가 되기 때문에 확인할 수 있고 지금 날마다 보도는 안 나지만 열심히 해놔야 합니다. 그런 좋은 말을 들었습니다. 그런 정권조 그때 취재부 기자 그 후배의 말을 들으면 그런 것을 했기 때문에 상당히 좋은 자료가 있을 것으로 생각됩니다.…","「10일의 기억1-15인 시민의 기억」 30~31p","곽복률","곽복률: 그 차량 시위에 저는 그 버스에 승차하지 않았었는데요, 금남로 상황이 그러고. 그 분수대 쪽에서 인자 힌츠페터, 그 카메라 들고 그 오잖아요. 그때 제가 빠뜨렸었는데 영화 「택시운전사」 스팟에 보면 줄 서서 박수 치잖아요. 줄 서서 박수친 거 안 했어요. 그냥 막 그 흩어져 있는데 오니까 좋아서 박수쳤고, 누가, 마이크를 잡은 사람이 “미국의 기자들이 왔다. 드디어 미국의 기자들이 왔다”라고 저는 들었어요.","면담자: 예, 그럴 수 있죠. 외국인이니까 당시는 쉽게 미국이라고 말할 수도 있었겠죠.","곽복률 그러니까 ‘미국의 기자들이 왔다, 이제 광주의 진실을 알릴 수가 있다’라고 저는 그렇게 들었었어요.","「10일의 기억1-15인 시민의 기억」 55~56p","김맹완","김맹완: 근데 딱 그 생각나는 게 있어요. 미국 뉴욕타임즈의 기자가 5일만 참아라. 참으면 미국에서","면담자: 도움을 줄 것이다?","김맹완: 네. 도움을 줄 거야. 그 얘기를…","「10일의 기억1-15인 시민의 기억」 91p","반상진","반상진: …집으로 돌아와서 인제 보니까 그런 상황이드만. 집엔 돌아왔고. 그리고 여 우게가 지금 방이 하나가 있는데 거가 그때 오효진이라고 MBC 기자가 있어요, 중앙에. 그 사람이 여그 와서 쭉 취재를 했어. 여그 와서 자면서. 그러고 나는 나가서 활동하고 이렇게 봐주고.","면담자: 서울에 있는 MBC 기자가 여기 와서요?","반상진: 예. 여 와서 우리 집 와 있었어요. 어디 갈 데도 없고 그때 그 난리에서. 긍게… 그래가지고 그때 내가 하는 일을 전부 이렇게 취재를 했어. 그때.","「10일의 기억1-15인 시민의 기억」 210~213p","면담자: 제가 생각할 때 조금 섭섭한 것이 이 오효진 기자가 중앙 기자잖아요. 서울에 있는 MBC 기잔데 이런 걸 다 취재했으면 이것을 방송을 해줬어야 되는데.","반상진: 그때는 다 했는데? 아… 못 허는, 아니, 자기 맘대로는 할 수가 없을 거 아녀. 이 5·18에 관계돼서만은. 왜냐면은 하고 싶은 말 그때 다 할 수는 없는 때 아녀.","면담자: 이 사람이 여기에서 취재할 때 5월 18일에서부터 27일, 그 난리 났을 때 다 여기가 있었다고요?","반상진: 다 여가 있었어. 그래갖고 중앙으로 간께 보고는 해줬을 것이여.","면담자: 보고는 했는데 거기에서 막혀버렸는가 보네요?","「10일의 기억1-15인 시민의 기억」 233~234p","정성채","정성채: …또 외국 기자들도 궁금해요. 5·18 기간에 내가 안내해줬던 일본 미국 기자들이 궁금해요.…","「10일의 기억1-15인 시민의 기억」 318p","최건","최건은 5월 27일 동아일보 사회부 차장과 함께 광주에 진입했다. 그는 동아일보 차에 취재 깃발을 달고 들어간 최초의 공식 기자였다. 그가 취재한 보도 자료들이 그 당시 신문에 공개되지는 못했지만…","「10일의 기억1-15인 시민의 기억」 323p","조광흠","조광흠 기자는 1980년 5월 당시 조선일보 광주주재 기자로 광주 시위 상황을 취재하고 있었다. 특히 그는 도청 앞 계엄군 발포 당시 그곳에서 취재 중이었다. 그는 계엄군과 가장 가까운 곳에 있어 당시 상황을 정확히 볼 수 있었다. 그의 증언은 계엄군과 시위대의 움직임을 파악하는 데 많은 도움을 준다. 그는 집단 발포 직전 상황이 계엄군과 시위대가 대화와 대치를 반복하고 있어 발포를 할 급박한 상황이 아니었다고 증언하고 있다. 아울러 전일빌딩 옥상에서 저격병이 M1 소총으로 시위대를 저격한 것을 목격하였다는 중요한 증언을 함으로써 군이 저격병을 운용하였다는 소문이 사실임을 확인해 준 것은 매우 의미 있는 증언으로 여겨진다. 「10일의 기억2-15인 시민의 기억」 29p","나경택","나경택은 당시 전남매일신문 사진부 기자로, 도청 앞에서 시위대와 대치 중인 계엄군 틈에 들어가 취재를 하던 중 발포 상황을 직접 목격하였다. 집단 발포 당시 11공수 63대대 대열 안에 있던 그는 무전병이 발포권 요청을 하고, 상급 지휘관의 승인과 승인을 받은 중대장인 차정환 대위가 발포 명령을 하달한 장면을 현장에서 목격하였고, 발포 당시의 상황을 생생하게 기억하고 있다.","차정환 대위는 공수부대와 전교사 병력간의 오인 사격 때 사망하여 발포와 관련된 중요한 그의 증언을 들을 수 없다. 나경택 기자가 차정환 대위 이름을 기억하고, 그 차 대위가 사망 군인 명단에 있는 것을 볼 때, 그의 증언의 신빙성을 높여 준다. 나경택 기자는 헬기의 사격 위협을 직접 경험한 사실도 증언하여 헬기의 발포 사실을 확인하여 준다.","나경택: …또 19일 날, 월요일 날 신문에, 광주에 지방지가 딱 두 군데 전남매일신문하고 전남일보 있었거든요. 근데 광주항쟁에 대해서는 한 줄도 쓰지를 못했습니다. 그래서 우리 전남매일 신문은 기자들이 20일자에 계엄의 검열 없이, 모든 신문을 그대로, 우리가 보는 대로, 사진 찍은 대로, 그대로 보도를 하자. 젊은 기자들이 결의를 했었습니다. 그래가지고 그것이 뜻대로 되지를 않자 저희들은 집단사표를 냈었죠. 그런데 강은 강을 불러내기 마련입니다. 그렇게 평화스럽게 시위를 했던, 구호를 외쳤던 학생들과 시민들이… 강경 진압에 맞서서 투쟁을 한 것이죠. 18일 날부터는 굉장히 강경 진압을 했고. 19일 날은 이제 모든 직장인들이 출근을 하지 않습니까? 근데 저희들이 이제 전부 숨어서 사진을 찍습니다. 왜 그러냐면, 시민들이나 학생들은, 19일 자에 제대로 보도를 안했기 때문에, 저희들이 이제 사진 찍고 취재한다는 것 자체가 굉장히 어려웠습니다.… 지방지는 20일 날 신문을 조금 내고는, 문을 닫아버렸습니다. 계엄당국에서는 기자들이고 전부 오라해가지고, 신문을 발행하라고 했었거든요. 다른 기자들, 윤전기를 돌리는 윤전부 직원들도 전부 광주를 빠져나갔고, 신문이 안 나왔어요. 역사는 기록 아니겠습니까? 그래서 언젠가는 광주 진실은 내 손으로 밝혀야겠다는 생각으로 저는, 숨어서 사진을, 취재를 했었던 것입니다.","…","나경택: 광주에는 신문사들이 문을 닫아버렸고, 방송은 계속 광주 폭도 여러분, 자제해주라고 이렇게 방송을 막 계속합니다. 그런 것을 볼 때마다 사람들은 더 흥분을 하고 그랬죠. 북한군이 내려왔다. 이런 것은 생각할 수가 없습니다. 왜 그러냐면 이상일 씨라고, 지금 대구 출신, 부산에 계시는데 그분이 국방부 정보처에 근무를 하면서 계엄군으로 되어갖고 시민군을 가장해서, 시위를 하면서, 시민들 사진을 전부 찍었던 사람입니다. 근데 그 이상일 씨는, 매일 사진을 찍고, 시위를 하면서도 사진을 찍어가지고, 광주시 변두리에다가 필름을 묻어놓으면, 땅을 파서 묻어놓고 보안대에다 연락하면 보안대가 필름을 가져가고, 또 생필름을 거기다 놔두고. 그래서 열흘간을 그렇게 기록을 했던 사람입니다.…","「10일의 기억2-15인 시민의 기억」 50~53p","김내수","김내수: 계엄군이 앞에 있고 우리가 그 뒤에서 근무하고 있는데. 여담입니다만. 그때 당시 전남일보 기자였던가? 광주일보 기자였던가? 나의갑 기자님이라고 계세요. 제가 잘 아는 기자님인데, 그 기자님이 우리 부대 뒤로 오시더니, 아이고 큰일 났네. 계엄군들이 시민들에게 너무 무자비하게, 대검을 장착해 무자비한 행위를 하고 있다고 하면서…","「10일의 기억2-15인 시민의 기억」 95~96p","박남선","면담자: 그러면, 계엄군들이 진압을 위해서 여러 가지 공작들을 쭉 해왔는데. 최후 통첩하는 과정들을 좀 굵직굵직하게 그런 부분에서 좀 설명을 해주시면 좋겠습니다.","박남선: …윤상원 씨가 처음에 저한테 와가지고, 처음에는 못 들어왔어요. 제가 무장 병력을 장악하고 도청을 통제하고 있으니까. 프레스 카드를 가진 기자들만 출입을 자연스럽게 출입할 수 있도록 하고 나머지는 통제를 했거든요.","「10일의 기억2-15인 시민의 기억」 132~133p","박남선: …그래서 윤상원 씨하고 많은 얘기를 했죠 했더니 그 와중에 윤상원 씨가 영어를 좀 잘한다고 그래서, 기자들은 아까 출입을 시켰다고 했지 않습니까? 그 외신 기자들한테 이 상황을 얘기를 해주시오. 그래가지고 윤상원 씨가 주로 하시는 일은 외신 기자들하고의 접촉이었습니다.","「10일의 기억2-15인 시민의 기억」 136p"]},
+    hyemin:{date:'5월 19일 이후',title:'병원에 남은 사람들',source:'「10일의 기억1-15인 시민의 기억」 152~153p · 271p',excerpts:["이기상","… 이기상 씨는 5·18민주화운동 기간에 시민들의 시신이 안치된 상무관에서 조문을 읽어주었고, 피가 부족한 사람들을 위해서 헌혈도 하였다. 그는 보건소장과 간호사와 함께 김정형 외과, 김승환 외과, 적십자 병원, 기독교병원 등을 다니면서 환자 명단을 파악하고, 부족한 의약품을 전달하는 역할도 감당했다.…","「10일의 기억1-15인 시민의 기억」 271p","면담자: 그럼 버스 탄 경험이나 시위에 참여한 경험도 없으시고요? 그러면 당시에 필요한 약들은 어떻게 운반해 주셨는가요?","이기상: 약 도매상이 동구에 제일 많았습니다. 백제, 대성, 제일 광주에서 큰 약도매상이 있었었어요. 그곳에서 응급실에 필요한 약들을 주문해서 배달하고 그리고 우리 보건소장 하고 간호사가 직접 응급약 가지고, 광주교도소에 가서 치료해 주고 했어요. 헬리콥터를 타고 치료해 주고 온 기억이 나요? 그때 의사가 보건 소장(박성남)이었고, 간호사가 이공란씨고요.","「10일의 기억1-15인 시민의 기억」 279p","박종수","박종수: 목격) 그리고 그 다음날, 그러니까 5월 19일이죠. 50대 중반인 김재수님이 가쁜 숨을 몰아쉬며 우리 치과의원으로 뛰어 들어오셨습니다. 도청 앞길을 가는데 베레모를 쓴 공수단 군인들이 무조건 붙잡아 곤봉으로 후려치더라는 것입니다. 변명이나 항의를 할 사이도 없이 일격을 당하고 보니 정신없이 달아나 우리 치과로 들어오셨다고 합니다.…","면담자: 그러면 이분이 다치셔서 선생님께서 치료해주셨습니까?","박종수: 네. 와서 보니까 이마에 피가 흐르고 해서 간단한 치료를 했습니다.","「10일의 기억1-15인 시민의 기억」 152~153p","반상진","면담자: 일일이 전화를 하셨겠네요, 그때는?","반상진: 그 전화는 의사회관 사무실에가 직원들이 있으니까 전 회원한테 전화해서 책에도 뭐 내가 적어놨지만 진료시간도 늘이고, 그리고 부상 환자에 대해서는 돈 받지 말고 그냥 치료 해주고 기록을 자세히 해놓으라. 그래서 부상 환자에 대한 다음 차질 없이 진료 하도록 했어요.","면담자: 선생님께서 치료해준 환자들이 어떤 환자들이 있었습니까? 예를 들어서 뭐 총상을 입었다든가.","반상진: 그거는 그 치료한 환자 중에는 어디 갈 수가 없으니까 그때는 우리 집 앞에도 군인들이 있었어요. 그리고 저 너머에도 군인들이 있었고. 없으니까 아퍼도 어디를 다치고 뭐해도 어디를 가지를 못해. 근게 가까운 병원에 가야 돼. 근게 내가 이비인후과 의사지만 모든 과를 다 봐줘야 돼. 손을 다쳤든 어디를 다쳤든. 다 찾아오면 다 봐주고. 그리고 찾아가서도 만나서 데리고도 오고 그랬어...","면담자: 총상 환자도 왔어요?","반상진: 총상 환자도 왔어요. 근데 많이 다친 사람은 아니었는데. 내가 지금 정확히 기억은 못해. 못해도 이렇게 뭐슬 얻어맞인 사람.","면담자: 각목, 곤봉으로 맞은 사람?","반상진: 예. 내가 총상 기억은 지금 잘 안 나. 글고 총상 환자를 내가 운송은 해주었어.","「10일의 기억1-15인 시민의 기억」 211~212p","면담자: 네. 선생님, 5·18 때 군인이 병원에 왔었죠?","반상진: …그래서 근데 내가 해야 할 일은 완전하게 치료해야 되고 살려줘야 되는 일이 내 일이야.… 그 시민군들도 어디서 쫓기면은 병원에 들어오면 내가 여기저기 다 숨겨주고 그랬거든.","「10일의 기억1-15인 시민의 기억」 213~214p","면담자: 선생님께서 플래카드 하나 걸려놓으시지 않으셨나요, 병원에다가?","반상진: 그때 걸어놨는데 내가 그 기억도 잘 못해. 하나 걸어놨어.","면담자: 여기가 뭐 이제 대표진료소다, 뭐 이런 식으로 걸어놓으셨나요?","반상진: 예. 뭐 불편하시면 언제라도 오세요. 24시간 문 엽니다. 아마 그런 내용으로 뭣을 해놨을 것 같애.","면담자: 네, 그리고 여기 오면 응급처치만 하고 또 후송도 하고 그랬죠, 어디 병원으로?","반상진: 그 얘기를 또 하나 하면은 오토바이, 이게 다친 환자를 뒤에서 뭘 얻어맞고 피가 펑펑 나는 환자를 오토바이에다 싣고 충장로 저 밑에서부터 여까지 왔어. 근데 요렇게 보니까 내가 치료해선 안 돼. 우선 응급처치만 하고 이건 대학병원으로 옮겨야 돼. 대학병원으로 옮기는데 그때는, 그때 뭐야. 이송차량이 광주 시내에 한 대 배끼 없는 때야. 환자 이송 (면담자 : 앰뷸런스가?) 앰블런스가 하나 밖에 없는 때야. 근게 글케 할 수가 없어. 근데 환자는 급해. 그래서 그 오토바이 주인한테 내가 부탁을 했어. 어떻게든지 이놈 살려야 된다. 근데 걸어갈 수도 없고 내가 데리고 갈 수도 없는데 내가 까운을 입고 오토바이 뒤에서 너를 이렇게 환자를 안을라니까 니가 대학병원까지만 가주자. 그래서 인제 그렇게 양해를 얻었어. 근데 그때는 요 뒤에로 하면은 복잡허니까 제일 가까운 데는 도청 옆으로 해가지고 이렇게 지금은 차 안 다니지만 저기 쭉우로 대학병원까지 올라가거든? 그리 내가 이렇게 안고 가서 응급실에 해가지고 살려냈어. 살았어, 결국은. 그래가지고 며칠 있다 퇴원해가지고 살아났어. 겨우. 근데 수송했기 때문에 그라고. 수송한 것은 그것만이 아니라 또 하나가 더 거시기한 것이 있어. 경찰서 옆에서 선배가 병원을 하고 있는데 나한테 전화 왔어. 우리 집에 시체가 두 구가 있다는 것이야. 총 맞어서 이렇게 쓰러져 있는 시체하고, 긍게 걸어오다가 죽어서 있고. 또 한 사람은 중상환자가 있어.","「10일의 기억1-15인 시민의 기억」 217~218p","반상진: …그랬는데 그 화물차 하는 기사가 먹을 것을 싣고 가드만. 그때는 그런 걸 사고팔고 할 때가 아니여. 그래서 부탁을 했어. 이러이러한 일이 있어서 니가 좀 도와야겄다. 그래야 사람 한 사람을 살려야겠다. 그래 가지고는 그 선배 병원에 가서 시신을 뒤에다 싣고 그리고 그 부상환자는 앞에다 앉히고 나 혼자 그 화물차 위에 가서 이렇게 서서 까운 입고 이렇게 서서 이러고 손 들고 서서 이렇게 갔어. 그런게 인자 그러니까 요 뭐여. 군인들도 인자 급한개비다 하고 거시기를 했을 것 아녀?","면담자: 그때는 거리에가 군인들이 다 있었어요?","반상진: (군인들이) 있는 때여. 있는 땐데 그래 가지고 딴 길로 가도 못해. 군인들 때문에. 그래 가지고 대학병원까지 이송을 했어. 그래 가지고 시신은 어쩔 수 없이 됐고, 거시기한 사람은. 아, 그때는 적십자병원으로 갔다. 처음에는 아까는 대학병원으로 갔고 적십자병원으로 가서 다 거시기를 했어.","면담자: 시신은 안치하고 환자는 수술… 반상진 그러고 인제 상황이 고렇게 되니까 피가 모자라. 근데 이걸 알고 인자 전국의사회에서 나한테 전화 와. 피를 보내줄까요? 약을 보내줄까요? 인자 계엄령이 선포되니까 차가 못 오니까 뭐 싣고도 못 와.…","면담자: 근데 바깥에 의사들이 여기에가 나쁜 상황이 있는지 알았나봐요?","반상진: …기자에다 신문에다 이렇게 보고를 했어. 그랬더니 막 걍 적십자병원 같은 데, 아니 기독병원 같은 데는 헌혈자가 밀려가지고 다 헌혈을 못할 정도로 되았어. 그래가지고 피가 그렇게 난 시민들이 그렇게 헌혈을 했어. 피가 남아돌아갔어.","면담자: 피가 필요하다고 광주시에다 알린 거죠? 전국에다 알린 거 아니죠?","반상진: 그리고 전국의사회에서 찬조, 돈이 와. 내가 오지 말라고 우리가 다 한다고 우리가 파견할 거나 어찌까 해서 의료파견까지도 요구가 와. 그래서 우리가 알아서 다 한다 그랬더니 그 다음에 약품은 약품을 다 하고 뭣도 하고.","「10일의 기억1-15인 시민의 기억」 219~220p","오경교","면담자: 많은 사체가 적십자병원에 있었는데요. 자식이나 친인척의 시신을 찾기 위해 찾아온 사람들이 많지 않았습니까?","오경교: 예. 많이 오셨죠. 완전히 그냥 정신이 없었고, 그때 당시에 사망자 인적이 확인되어서 응급실 앞에다가 붙여 놓는데 이제 없으면, 왜 없냐? 다시 확인해봐라. 직접 확인해야겠다. 영안실에 그냥 직접 들어가려고 해 진정을 시키고 안내했던 그런 기억도 있고요. 그때만 해도 너무 많으신 분들이 찾아와 수소문하고 확인해보고, 저기 전남대병원 가서 확인했는데 없더라. 여기뿐이잖은가? 여기 없으면 기독병원이나 남광병원 쪽도 한번 가보시는 게 낫지 않겠습니까? 이런 얘기를 자꾸 했어요.","「10일의 기억2-15인 시민의 기억」 306p","국군광주 통합 병원","도청등 전 시가지가 시위대에 의해 점거된 21일 전남대 병원으로부터 산소가 부족, <희생자?>가 늘어날 것 같다는 연락을 받고 병원 내에 긴급용으로 보관중이던 산소 4통을 수송기를 통해 전달. <시기전?> 벌어진 21일 오후 화정동에서 유탄을 맞은 5세 가량의 여자아이를 병원으로 후송, 생명을 구해줌. 현재까지 보호중에 있으며 부모를 찾아주려고 노력중. 전남대 부속병원. 시민과 학생들이 부상을 입고 몰려든 19일부터 병원 내 전 의사들이 출근, 현재까지 비상근무. 20일 밤에는 병원 내 산소가 딸리자 응급실 의사 2명이 구급차를 동원, 광주 공단에 있는 <임단?> 가스와 호남가스 공장을 찾아가 남아있던 10통의 가스 모두를 신분증을 맡기고 가져와 사용. 「조광흠 메모- 낱장」 7장","당국시내 병원","광주사태동안 관통상, 화열상, 타박상등을 입은 중상자들은 아직도 시내 곳곳의 병원에 입원중이다. 전남도측은 29일 (시내 흩어져) 있던 3백명 환자들은 전남대 조선대 기독교 적십자등 4개 종합병원과 김승원외과 김정형외과 서석병원 김엽병원등 모두 8개 병원에 모으도록 조치했다. 이에 따라 박윤식외과등 시중 개업의들은 그동안 무료치료해주던 환자들을 기록과 함께 가까운 곳으로 옮겼다. 80여명이 입원해 있는 전남대 부속병원에서는 14개 베드밖에 없던 응급실을 50개 규모로 확장 운영해야 했던 엊그제 열시 야전병원 시절을 서서히 잊어가고 있다. N외과의사는 ’중환자들이지만 생명에 위험이 있는 사람은 없다. 그러나 치료기간은 몇 개월 걸려야 할 환자도 있다‘고 말하면서 ’이번 일로 남는 상처 중 환자들에게 평생 남아있을 육체적 상처야 말로 가장 오래 갈 것‘이라며 씁쓸한 표정이었다. 아직도 집을 나간 후 연락이 없다며 아들 딸을 찾는 부모들이 초조한 발걸음을 옮겨 놓고 있었다. 특히 영안실 부근에는 가족들이 시체를 확인하느라 영안실직원의 가운을 붙잡고 ’한번만 더 보도록 해달라‘고 하소연하는 모습이었다. 전남대 부속병원 혈액은행 한 직원은 헌혈하는 시민들이 (남지도 않는다. 며칠 전까지만 해도 많아 오히려 혈액 수습 걱정은 전혀 없다면서 공급이 잘되면 1주일전엔 헌혈하려는 사람을 돌려보내는 일이 나의 임무처럼 느껴지기도 했었다고 여유롭게 농담까지 했다. 대한 적십자사 전북지사에서 혈액 2백 36병과 산소 2백통을 보내오기도 해 한결 마음 가벼운 상태. 「조광흠 메모- 5」"]}
   };
   return map[a]||map.minjae;
 }
 function recordCards(){return [
   anchorRecord(),
-  {date:'1980.05.21',title:'애국가와 집단발포',source:'「10일의 기억2-15인 시민의 기억」 60p · 348p',images:[{src:'assets/records/jang_photo_1.webp',caption:'5·18민주화운동기록관 제공 · 장재열 기자 기증 사진'},{src:'assets/records/jang_photo_2.webp',caption:'5·18민주화운동기록관 제공 · 장재열 기자 기증 사진'}],excerpts:[`나경택: 그런데 통신병이 발포 명령 떨어졌습니다! 그렇게 보고를 하니까 그대로 차 대위가 발포! 했는데. 보고, 뭣도, 뭐도 없이 저도 뒤로 돌아서서 도청 안으로 피신을 해버렸죠.`,`이동춘: 그 시간, 그 상황에 분명히 제가 도청 앞에 있었고, 지금은 없어졌습니다마는 당시 무등 관광호텔 자리에 제가 위치하여 있었는데, 애국가를 분명히 들었습니다. 애국가 소리와 동시에 집단 발포가 있었고요. 그것은 제가 듣고 그 자리에 있었기 때문에요. 확실한 사실입니다.`],note:'기록마다 애국가 청취 여부와 발포와의 관계에 대한 기억이 다릅니다. 시뮬레이션에서는 애국가가 들린 뒤 총성이 이어지는 경험만 제시하고, 애국가가 발포 신호였다고 단정하지 않습니다.'},
-  {date:'1980.05.25',title:'우리는 왜 총을 들 수밖에 없었는가',source:'5·18민주화운동기록관 제공 · 「우리는 왜 총을 들수 밖에 없었는가？」 · 「5·18민주화운동기록물 자료총서 02_취재수첩」 장재열 216p',images:[{src:'assets/records/why_armed_document.webp',caption:'5·18민주화운동기록관 제공'}],excerpts:[`우리는 왜 총을 들 수 밖에 없었는가?\n...너무나 무자비한 만행을 더 이상 보고 있을 수만 없어서 너도 나도 총을 들고 나섰던 것입니다...`,`...우리는 더 이상 당할 수만은 없었습니다. 그래서 우리는 이 고장을 지키고 우리 부모형제를 지키고자 손에 손에 총을 들었던 것입니다. 그런데도 정부와 언론에서는 계속 불순배, 폭도로 몰고 있습니다...`,`...시민 여러분, 우리 시민군은 온갖 방해에도 불구하고 여러분의 안전을 끝까지 지킬 것입니다. 또한, 협상이 올바른 방향대로 진행되면 우리는 즉각 총을 놓겠습니다...\n\n...민주시민 여러분. 우리 시민군을 절대 믿어주시고, 적극 협조해 주시기 바랍니다\n1980.5.25\n시민군 일동`]},
-  {date:'1980.05.26',title:'맨몸으로 탱크 앞에',source:'「5·18민주화운동기록물 자료총서 02_취재수첩」 장재열 217p · 「5.18 기록관 전시」',excerpts:[`8:00 광주 수습대책위원 15명 탱크 몸으로 막겠다고(5월 26일 오전 8시경 계엄군들이 백운동, 농성동 외곽에서 탱크를 앞세우고 경계지점을 넘어 광주 시내로 압박해 들어오자 수습대책위원들이 이를 온몸으로 막겠다며 ‘죽음의 행진’을 하는 상황.)`,`5월 26일 외곽 지역을 봉쇄하고 있던 군 병력이 탱크를 앞세우고 시내 쪽으로 전진한다는 소식이 도청으로 전해졌다. 도청에서 밤새 회의를 이어가던 수습위원들도 긴급 사태를 논의했다. 이때 김성용 신부가 ‘우리들이 총알받이가 됩시다. 탱크가 있는 곳으로 걸어갑시다. 광주시민들이 다 죽어가는데 우리가 먼저 탱크 앞에 가서 죽습니다’라고 제안했다. 수습위원들의 결연한 분위기 속에서 죽음의 행진이 시작되었다.…`]},
-  {date:'1980.05.27',title:'마지막 새벽',source:'「5·18민주화운동기록물 자료총서 02」 김영택 취재수첩 88p · 「5·18민주화운동기록물 자료총서 01」',excerpts:[`5. 27일 새벽\n\n2시 30분 농성동 쪽에서 총성이 심하다\n\n3시경 학생들 「계엄군이 쳐들어 오고 있습니다.시민들 협조해 주십시오」고 호소.\n\n3시 반 계엄군 시내진입\n\n아침 5시 10분 시내장악\n\n소탕전\n\n군 병력 시내 요소 집결\n\n6시부터 군 진입과 시민들 거리로 나오지 말 것\n\n공무원 7시 반까지 출근할 것\n\n무기소지자 투항.\n\n숨겨주지 말라고\n\n계속 방송.`]},
-  {date:'1980.05.22~29',title:'며칠 뒤, 밀린 신문',source:'「조광흠 메모- 1」',excerpts:[`광주시내에는 지난 22일부터 서울에서 발행되는 신문이 배달되지 못하다가 28일부터 정상배달이 가능해져 29일 그동안 밀렸던 신문들까지 배달되었다. 광주 일부에서는 한때 서울에서는 신문이 발행되지 않고 있다는 허탈이 나돌기도 했는데 각 신문사의 밀렸던 신문이 배달되자 ’그동안 신문이 나왔냐‘고 의아해하는 시민이 있었다.`]}
+  {date:'1980.05.21',title:'애국가와 집단발포',source:'「10일의 기억2-15인 시민의 기억」 60p · 348p',excerpts:["이은방","면담자: 21일 도청에서 집단 발포가 이루어지기 전에 애국가가 울려 퍼졌는데 혹시 들었는지요?","이은방: 모르겠어요. 아까 말씀드린 대로 도청을 사수하기 위한, 참으로 많은 밀고 당기기가 있었고 또 총 발포도 있었고... 「10일의 기억1-15인 시민의 기억」 295p","나경택","면담자: 그럼 발포 명령을 통신으로 받고, 발포 상황을 보았을 텐데 상황을 설명을 해주시겠습니까?","나경택: 그런데 통신병이 발포 명령 떨어졌습니다! 그렇게 보고를 하니까 그대로 차 대위가 발포! 했는데. 보고, 뭣도, 뭐도 없이 저도 뒤로 돌아서서 도청 안으로 피신을 해버렸죠.","면담자: 아, 피신해 그 장면은…","나경택: 그리고 뭐 이제 저는 애국가가 나왔니, 어쩌네 한 소리를. 저는 애국가도 듣지도 못했고. 그러고 뭐, 뭐 1시다 그러는데 1시가 조금 전입니다.","면담자: 한 시 좀 가까이… 그럼 애국가가 울렸다고 얘기하는데 그것이 경황이 없어서 못 들으신 겁니까? 아니면 애국가가 안 나온…","나경택: 아니에요, 아니에요. 그것은 모르겠는데. 저도 경황이 없어서 못 들었을 수도 있겠죠. 어떤 분들 증언을 보면, 김 목사 됐던, 공수부대 출신으로 목사가 된 사람도 애국가를 들었다고 하고. 또, 강, 누구죠? 거기도 들었다 하고. 돌아가신 동아일보 김영택 기자도 수첩에 애국가라고 써진 것을 보면, 애국가가 울렸는데. 제가 생각했을 때는, 뭐 1시가 됨과 동시에 발포하란 명령이 떨어져 발포한 게 아니라, 애국가가 울려 퍼지게 하면서 발포를 했던 것은 아닌 것 같아요. 왜 그러냐면 통신병이 발포 명령이 떨어졌습니다. 말한 순간에 이렇게 발포가 이뤄졌거든요. 애국가가 어떻게 보면 나는 좀 이해되지 않아요.","면담자: 애국가가 먼저 나오는 상황이었다고 봐야겠습니다.","나경택: 그것은 모르겠어요. 통신병이 차 대위한테 보고할 때 발포 명령하여 발포된 것인데 언제 애국가를 누가 틀었는가를 나는…","면담자: 발포 쪽에서 튼 것으로 지금 얘기가 돼 있지 않습니까?","나경택: 저는 모르겠습니다. 「10일의 기억2-15인 시민의 기억」 60p","박주은","면담자: 궁금한 것은 왜 군인들이 집단 발포했는가? 우리가 흔히 보면 애국가가 1시쯤 5·18 나오고, 앞에 대치돼 있던 군인들이 뒤로 빠지고, 또 총을 착용하고 있던 계엄군이 발포했다고 얘기하고 있는데. 그 과정에 대해서 혹시 목격하신 것 있습니까?","박주은: 그날 정오 무렵에 발포가 일어났잖습니까? 대치하는 전열은 그쪽은 그냥 사람 하나 끼어나갈 수 있는 정도가 아니라 촘촘하게…","면담자: 군인들이?","박주은: 예. YMCA 쪽과 전일빌딩 도로를 완전히 차단했죠. 2중, 3중으로. 아예 착검하고 총 들고 있었죠. 뒤에 걔들이, 뚫린 다음에 뒤에 장갑차 있는 것을 내가 봤고요.","면담자: 뒤에는 장갑차가 배치되어 있고요?","박주은: 처음에는 공수부대들 때문에 장갑차가 있는지를 몰랐습니다. 나중에 보니까 장갑차가 계속 뒤로 무르고 있더라고요. 그러면서 발포가 시작된 겁니다...","「10일의 기억2-15인 시민의 기억」 80~81p","김내수","면담자: 그러면 발포 당시에 애국가가 흘러나왔다는 증언들이 나오고 있는데요.","김내수: 저는 그건 몰라요. 못 들었고 그런 현장을 못 봤습니다 「10일의 기억2-15인 시민의 기억」 96p","박남선","면담자: 일부 증언에 의하면 발포 당시에 애국가 방송이 나갔다. 이렇게 얘기를 하고 있습니다. 혹시 계엄군 발포와 애국가 방송 간의 그 관계에 대해서 경험하신 것이 있으면 말씀해주십시오.","박남선: 제가 바로 도청 앞에 있었는데요. 시위대들이 워낙 목소리 크게 외치니까, 순간 제가 애국가 방송을 듣지는 못했어요. 도청 옥상에서 울려 퍼졌다고 그러는데. 「10일의 기억2-15인 시민의 기억」 116p","이동춘","면담자: 공수부대 현장 지휘관의 발포 명령에 따라 계엄군이 발포하였는데, 이때 애국가 방송을 들었다는 증언자들이 있습니다. 당시 애국가 방송을 들었는지요?","이동춘: 예.","면담자: 발포 당시에 어떤 목격이나 청취를 하셨는지요?","이동춘: 그 시간, 그 상황에 분명히 제가 도청 앞에 있었고, 지금은 없어졌습니다마는 당시 무등 관광호텔 자리에 제가 위치하여 있었는데, 애국가를 분명히 들었습니다. 애국가 소리와 동시에 집단 발포가 있었고요. 그것은 제가 듣고 그 자리에 있었기 때문에요. 확실한 사실입니다. 「10일의 기억2-15인 시민의 기억」 348p","이동춘: 아마 5월 21일 집단 발포 이후에, 집단 발포로 많은 학살이 이루어진 것에 대해서 분노한 시민들이 우리도 살기 위해서, 정말 살기 위해서 총을 들게 된 거죠. 그래서 21일 이후에 가장 먼저 광주에서 가까운 인근 지역인 남평 지서에 가서 총기를 가져온 것으로 알고 있습니다. 다음에 이 지역 지리가 좀 밝은 사람들이 화순을 통해서 총기를 가져오게 되었죠. 「10일의 기억2-15인 시민의 기억」 354p","이동춘: 21일 날은 서두에 말씀했다시피 집단 발포가 있었고... 「10일의 기억2-15인 시민의 기억」 357p","박종수","박종수: 경찰은 앉아 있었습니다. 우리 데모대를 보고 앉아 있고, 군인들 향해서 돌멩이를 몇 개 던졌습니다. 총을 들고 있던 군인이 경찰 바로 1m 앞을 겨눠 사정없이 총을 진짜 쐈습니다. 탄피가 떨어졌으니까. 내가 군대 있었으니까. 그런데 경찰 맞은 사람 없고 앞에다 엄포로 그렇게 쏜 것 같애요. 그러니까 탄피가 튀어나오니까 경찰은 총알을 피해서 깜짝 놀래가지고 데모대 쪽으로 흩어졌어요. 흩어지면서 ‘모두 피하세요’ 하면서 소리치면서도 자기들도 피하고 인근 건물로 다 도망을 갔습니다, 경찰들도. 총을 든 군인 한 명이 눈여겨둔 젊은이를 끝까지 쫓아가 사정없이 구타하고 포박하여 자기들이 준비한 차에 싣고 어데로인지 사라지는 것을 치과 앞에서 보았습니다. 그러니까 돌멩이 던진 사람 잡아가지고.","면담자: 이때는 그다음 날입니까? 며칠입니까? 5월 20일?","박종수: 네.","참관자: 그 총을 쏜 날. 몇 시쯤입니까?","박종수: 그러니까 (19일 다음 날) 사람 죽이진 않았는데 19일 날…. 요거는 아니. 요거는 21일 날입니다. 21일 날. 21일 날 총을 쐈는데 사람은 죽진 않고 사람 옆에다가 쐈습니다.","면담자: 몇 시쯤입니까? 오전입니까? 오후?","박종수: 오후 1시경쯤 됐을까 싶은데요.","「10일의 기억1-15인 시민의 기억」 153~154p","목격) 국군이 광주 시가지를 철수하기 직전 5월 21일 오후 늦게 치과 퇴근 시간인데. 그날요, 총소리가 요란했어요. 그래서 행인들은 없었고 도청 앞이니까 아주 총이 많이 있었고 행인들은 없었고 사람이 보이면 무조건 정조준을 해서 총을 쐈어요, 그때는. 그래서 우리 치과는 2층에 있었는데 치과 쪽으로 사정없이 총이.","「10일의 기억1-15인 시민의 기억」 154p","이기상","면담자: 21일 날 집단 발포가 있었잖아요? 그건 혹시 기억나세요?","이기상: 직접 보지는 못했지만, 사무실에서 대기하면서 심각하다는 소식을 들었죠. 군인들이 조준 사격을 했다든지, 사람이 툭 쓰러지고 있다든지 ….","「10일의 기억1-15인 시민의 기억」 280p","홍장희","홍장희: 그때 처음 집단 발포가 되었을 때가 기억나네요. 전일빌딩 앞에가 그때 사람들이 YMCA 그 정도 선이 라인이에요. 무슨 선이 그어져 있지 않는데 그때 당시에 도청 오른편에 군인들이 무장하고 있었고 그리고 나중에 알았는데, 옥상 부근에도 군인들이 있었어요. 도청 옥상에서 발포가 되자, 사람들이 꺼꾸러지는 거여요. 사람이 꺼꾸러지자, 옆에 있던 사람이 메고, 그때 적십자병원이 가장 가까웠어요. 그래서 적십자병원으로 사람을 메고 가는데 제가 맨 앞에 있었기 때문에 그 앞에서 쓰러지는 사람을 제가 가장 쉽게 붙들 수 있어서 그 사람 데리고 적십자병원으로 갈려고 했어요. 그런데 서로 데리고 가려고 하기 때문에, 저는 가지 않고 중간에 다른 사람에게 맡기고 또 다시 돌아왔어요. 근데 총이 발포되는 상황은 YWCA 그 앞에 사람들이 더 진입을 하면 발포가 됐고 그 자리에 머물러 있을 때는 발포가 안 됐어요. 그 이상하게 그 선도 정해진 거고 그 선 이상을 넘어가면 발포가 되고 넘어가지 않으면 발포가 않았서 그 선이 유지된 것 같아요. 저는 서서 더 앞으로 가지 못하도록 막는 일을 했어요. 왜냐면 계속해서 피해자가 많이 발생하니까. 제가 그때 군대 갔다 왔으니까 아는데, 정확하게 조준 사격을 하는 것 같았어요. 적극적으로 나서서 저항하는 사람들이 쓰러졌어요. 그런데도 사람들이 흩어지지 않았어요. 오후쯤 되어가지고 시민군들이 장갑차를 끌고 와서 분수대 앞을 돌면서 시위를 했죠, 그날 사람들이 환호성은 대단했고요. 그때 아시아 자동차에서 만든 차량이 상당 부분 그때 다 나왔어요. 제가 목격하기로는 그렇게 장갑차 시위가 있었음에도 불구하고 시위하는 그 사람들에게도 사격이 계속됐죠. 장갑차에 탔던 사람이 총에 맞아서 그 자리에 차가 멈추는 상황이 있기도 했어요. 오후 한 4시경에나 해질 무렵이라고 생각이 되는데 그때 카빈총이 나왔어요. 카빈총이 나왔고 그때 총을 이렇게 한 자루씩 나눠주고…","「10일의 기억1-15인 시민의 기억」 372~373p"],note:'기록마다 애국가 청취 여부와 발포와의 관계에 대한 기억이 다릅니다. 시뮬레이션에서는 애국가가 들린 뒤 총성이 이어지는 경험만 제시하고, 애국가가 발포 신호였다고 단정하지 않습니다.'},
+  {date:'1980.05.25',title:'우리는 왜 총을 들 수밖에 없었는가',source:'5·18민주화운동기록관 제공 · 「우리는 왜 총을 들수 밖에 없었는가？」 · 「5·18민주화운동기록물 자료총서 02_취재수첩」 장재열 216p',images:[{src:'assets/records/why_armed_document.webp',caption:'5·18민주화운동기록관 제공'}],excerpts:["。5/18[5:18] 민중봉기는 전 시민의 의거임을 전 언론기관을 통하여 인정하라","。광주의거를 존속시키는 또 다른 조직을 만들 것","。총기회수는 일단 하나 투쟁 목적이 이루어지지 않는 한 총기 반납은 않는 것을 원칙으로 하겠다","「5·18민주화운동기록물 자료총서 02_취재수첩」 장재열 216p","...너무나 무자비한 만행을 더 이상 보고 있을 수만 없어서 너도 나도 총을 들고 나섰던 것입니다...","정부당국에서는 17일 야간에 계엄령을 확대 선포하고, 일부 학생과 민주인사, 정치인을, 도무지 믿을 수 없는 구실로 불법 연행하였습니다.","또한, 18일 아침에 각 학교에 공수부대를 투입하고 이에, 반발하는 학생들에게 대검을 꽂고 ’동격 앞으로‘를 강행하였고, 이에 우리 학생들은 다시 거리로 뛰쳐나와 정부 당국의 불법 처사를 규탄한 것입니다...","...계엄당국은 18일 오후부터 공수부대를 대량 투입하여 시내 곳곳에서 학생, 젊은이들에게 무차별 살상을 자행하였습니다...","...또한 나중에 알고보니, 군 당국은 계획적으로 경상도 출신 제7공수병들로 구성하여 이들에게 지역감정을 충동질하였으며, 더군다나 이놈들을 3일씩이나 굶기고, 더더군다나 술과 흥분제를 복용시켰다고 합니다...","...20일 밤부터 계엄당국은 발포 명령을 내려 무차별 발포를 시작했다는 것입니다...","...우리는 더 이상 당할 수만은 없었습니다. 그래서 우리는 이 고장을 지키고 우리 부모형제를 지키고자 손에 손에 총을 들었던 것입니다. 그런데도 정부와 언론에서는 계속 불순배, 폭도로 몰고 있습니다...","...시민 여러분, 우리 시민군은 온갖 방해에도 불구하고 여러분의 안전을 끝까지 지킬 것입니다. 또한, 협상이 올바른 방향대로 진행되면 우리는 즉각 총을 놓겠습니다...","...민주시민 여러분. 우리 시민군을 절대 믿어주시고, 적극 협조해 주시기 바랍니다","1980.5.25","시민군 일동","「우리는 왜 총을 들수 밖에 없었는가？」"]},
+  {date:'1980.05.26',title:'맨몸으로 탱크 앞에',source:'「5·18민주화운동기록물 자료총서 02_취재수첩」 장재열 217p · 5·18민주화운동기록관 전시',excerpts:["이강수(李江洙) 19","。5/25[5:25]수습대책 시작","금남로 → 신역 → 공용터(공용터미널.) MBC → 금남로 (5/5)","8:00 광주 수습대책위원 15명 탱크 몸으로 막겠다고(5월 26일 오전 8시경 계엄군들이 백운동, 농성동 외곽에서 탱크를 앞세우고 경계지점을 넘어 광주 시내로 압박해 들어오자 수습대책위원들이 이를 온몸으로 막겠다며 ‘죽음의 행진’을 하는 상황.)","「5·18민주화운동기록물 자료총서 02_취재수첩」 장재열 217p","26일 새벽 무전기에서 다급한 혁명군의 목소리가 흘러나왔다.","“놈들이, 놈들이 쳐들어 옵니다. 여기 농성동인데요.”","…박남선은 전 혁명군에게 출동명령을 내렸다. 기둥에 기대서거나 시멘트 바닥에 쭈그려 앉은 채로 짧은 단잠에 빠져있던 시민군들은 ‘계엄군 진입’ 단 한마디에 벌떡 일어나 차량으로 달려갔다…","…계엄군의 탱크가 혁명군들의 바리케이드를 깔아뭉개고 한국전력 앞까지 진격해 있었다. 길게 뻗은 탱크의 기관포가 시민군을 향해 불을 뿜을 듯 웅대한 모습을 드러냈다. 총기를 반납하지 않으면 무력진압하겠다는 계엄군의 위협에 ‘당신들이 그럴수록 혁명군은 더 단단해질 뿐’이라며 강력하게 원위치로 물러갈 것을 주장했다…","…이성학 장로가 무거운 분위기를 박차고 일어났다. “젊은이들에게 맡길 수만은 없습니다. 우리도 일어납시다. 우리 어른들이 죽음으로 막읍시다’…","…수많은 기자들이 맨손으로 죽음을 맞으러 가는 수습위원들의 뒤를 따르며 플래쉬를 터뜨렸다. 죽음의 소리인 양 음산하게 울리는 자신들의 발소리를 들으며 이들은 농촌진흥원까지 계속 걸어갔다.","이미 무장한 시민군과 대치중인 계엄군에게 이들은 계엄군이 철수하기 전에는 어떤 협상에도 응하지 않겠다며 버텼다. 잠시 후 계엄군은 원래의 자리로 철수했다. 외신기자들에 의해 ‘죽음의 행진’으로 이름 붙여진...","…’죽음의 행진’을 할 때에 무장한 민중들은 중음의 행진을 맹세하며 봉기의 총을 움켜쥐고 있었다.","…자신들의 무장으로 새로운 민중권력을 수립하고자 하는 민중들을 두고서 죽음의 행진을 하였다.…","「5·18민주화운동자료총서-12권」 죽음의 행진 201~202p","5월 26일 외곽 지역을 봉쇄하고 있던 군 병력이 탱크를 앞세우고 시내 쪽으로 전진한다는 소식이 도청으로 전해졌다. 도청에서 밤새 회의를 이어가던 수습위원들도 긴급 사태를 논의했다. 이때 김성용 신부가 ‘우리들이 총알받이가 됩시다. 탱크가 있는 곳으로 걸어갑시다. 광주시민들이 다 죽어가는데 우리가 먼저 탱크 앞에 가서 죽습니다’라고 제안했다. 수습위원들의 결연한 분위기 속에서 죽음의 행진이 시작되었다.…","「5.18 기록관 전시」","이동춘","이동춘: 26일 오전 여덟 시 시민수습대책위원들이 농성동에 이른바 죽음의 행진을 하지 않았습니까? 아까 말씀드렸다시피 현재의 화정역 부근에 탱크를 앞세우고 바리케이트를 치고 있던 계엄군들이 점점 밀고 내려왔습니다. 농성동 로타리 쪽으로. 신고를 받고 출동한 결과 계엄군들이 계속 압박해서 들어와 시민수습대책위원들이 죽음의 행진을 하게 된 것이죠. 당시 우리는 어디까지 철수를 했었는가 하면, 농성동 벚꽃 유명한 농촌진흥청, 요즘에 상록회관으로 바뀌어 있죠. 거기까지 우리는 철수했던 상황이었고요. 그래서 수습대책위원들이 농촌진흥청을 통과해서 농성동으로 죽음의 행진을 했던 것으로 기억하고 있습니다. 그 행진을 이어서 도청 앞에서 4차 민주수호범시민궐기대회를 마지막으로 열었던 것으로 기억합니다.","「10일의 기억2-15인 시민의 기억」 360~361p"]},
+  {date:'1980.05.27',title:'마지막 새벽',source:'「5·18민주화운동기록물 자료총서 02」 김영택 취재수첩 88p · 「5·18민주화운동기록물 자료총서 01」',excerpts:["5. 27. 화. 맑음","계엄군이 오늘 새벽 3·30분[3시 30분]에 도청 앞으로 침투하여 관공서를 장악하고 있던 강경파 폭도들을 사살하고 또한 체포했다는 긴급 뉴스가 전해지자 눈물이 나왔다.…","오늘 아침 6시까지만 해도 총성이 빗발치어 다시 작전이 시작되는구나 하고 요란한 광음 소리를 내며 하늘을 나르는[나는] 비행기와 총소리에 숨소리마저 죽여 가며 오늘에 처한 우리들의 운명을 하나님께 맡겨 보기도 했다.","그리고 밤이 되자 위험한 변두리 지역인 화순으로 통하는 길목에 있는 집이라 마음을 놀[놓을] 수가 없었는데 통금 시간이 약간 넘어서 다시 따발총 소리가 한 차례 울리었다.…","「5·18민주화운동기록물 자료총서 01」 218p 김송덕일기","27일 화요일","아침 방송에 계엄군이 도청을 탈환하고 폭도를 진압했다고 뉴스가 터진다.","4시 30분부터 작전해서 6시에 완전 군의 작전이 성공적으로 효과 있는 진압이 됬[됐]다고 시민을 안심시키려 뉴스가 간헐적으로 계속된다.","도청에 진주했던 시민 학생은 모두 폭도였던가!","생포 207명 민간인 피해 전무, 폭도 사망 2명으로 뉴스의 전공 발표가 있다.","진정 아무 탈 없는 질서 회복이라면 오히려 다행일지도 모르겠다.","아마 그 안에는 탈취해 온 폭발물, 총기류 등 위험물이 많았던 것으로 소문이 있지 않았던가! 그런 위험물을 아무 탈 없이 진압했다면 전광석화 같은 작전 성과일까?","폭도들의 내분도 있었을까? 폭발물에 대한 사용 찬반이 격론했을 법한 상황도 예측되는데 정녕 그것만은 사수해서라도 폭파되지 않도록 자제도 했을까?","하여간 온갖 안정을 위한 양심의 작용과 위기 예방의 슬기도 담겨졌었다면 더욱더 보람 있는 일이고 화중에서나마 시민의 긍지와 용기, 애국적 충정을 훗날 평가해줘야 할 것 아니겠는가! 생각해 봄직도 하다.","“모든 공직자는 07시 30분까지 자기 직장에 복귀하라.”","“복귀치 않으면 직장 이탈로 처리될 것이다.”라는 계엄사의 포고령이 방송된다.","아마 공직자는 이제 어질어지고 밀려 있는 자기 직장 일을 간추려 정리하고 처리하여 질서 회복에 적극 참여해야 되겠지!…","공무원증을 한 손에 움켜쥐고 일반인이 통행 못 하는 군데군데 계엄군의 초소를 통과하는데 어떤 특권이라도 있는 것 같은 착각이 든다…","오랜만의 밖의 거리를 보노라니 전화에 할퀸 자국은 별로 없어 다행인데 전차며 계엄군의 무장한 긴장된 모습들!","그리고 바쁘게 내달리는 군용차 찦[짚]차, 관용차량 등의 움직임이 예의 심상치 않은 일들로 분망하고 긴장된 감을 주곤 한다.","거리마다 제한된 구역마다 주민들이 거리에 옹기종기 모여 이것저것 훔쳐보며 지켜보며 계엄군의 행동 반경을 일일히[이] 그러나 아주 조심스럽고 다소는 겁먹은 얼굴들로 응시하며, 더러는 아무렇지도 않은 척 엉뚱한 행동을 하고 있으나 역시 모든 분위기가 아직은 전쟁 이후의 선무 거리임은 틀림없다.","둔탁하고 육중한 쇠뭉치로 된 전차의 군집을 돌고개에서 보면서 그 위용에 위압감마저 가지며 피곤한 몸을 끌어 성심병원을 닿으니 교대 근무하는 계엄군이 들락날락 조금은 그렇게 기분 좋은 편은 못 된다. 거리의 2, 3층 건물은 옥상마다 계엄군의 엄호 초소도 마련되어 방어와 진압에 만전을 기하는 것 같다.","시민은 이 정도 정부군이 진주한 시가지를 어떻게 생각할까!","안전한 생활이 가능해진 것일까? 진정 이대로 살았구나 하고 안도할까?…","「5·18민주화운동기록물 자료총서 01」 246~249p 조한유일기","5월 27일 화요일 맑음","눈을 떴다. 아침 7시가 다 되어 있었다. 반사적으로 라디오 스위치를 넣었다.","“광주시민에게 알립니다. 어제 새벽 3시 10분에 계엄군이 완전히 광주시를 장악. 6시 현재 체포 207명 사살 3명 군인 부상자도 4명이나 됐으며 민간인은 다친 사람이 하나도 없읍[습]니다. 공공건물이나 관청은 모두 군이 장악하고 있으니 모든 공무원은 7시 30분까지 정상 출근하십시오.”","“다시 한 번 알려드리겠읍[습]니다”","깜짝 놀랐다. 어제 오후 방송에 “놀라지 마십시오. 군이 보급로를 위해 담양, 비아 방면으로 이동 중에 있읍[습]니다. 우리는 여러분의 생명과 재산을 보호하고 있습니다. 이상은 계엄사에서 알려드리는 말씀입니다.”…","「5·18민주화운동기록물 자료총서 01」 275~276p 강서옥 일기","5월 27일 일","광주 10일째","… 조반을 먹을[으]려고 하니 어머니께서 7시 뉴-스에 광주를 계엄군이 점령하고 200 이상을 생포했다고 한다. ×이고 지라리고 가슴이 조여들고 한기가 든다. 발이 시리고 사지가 떨린다. …","「5·18민주화운동기록물 자료총서 01」 290~293p 강서옥일기","5. 27일 새벽","2시 30분 농성동 쪽에서 총성이 심하다","3시경 학생들 「계엄군이 쳐들어 오고 있습니다.시민들 협조해 주십시오」고 호소.","3시 반 계엄군 시내진입","아침 5시 10분 시내장악","소탕전","군 병력 시내 요소 집결","6시부터 군 진입과 시민들 거리로 나오지 말 것","공무원 7시 반까지 출근할 것","무기소지자 투항.","숨겨주지 말라고","계속 방송.","소준열 소장(계엄분소장)","「5·18민주화운동기록물 자료총서 02」 김영택 취재수첩 88p"]},
+  {date:'1980.05.22~29',title:'며칠 뒤, 밀린 신문',source:'「조광흠 메모- 1」',excerpts:["광주시내에는 지난 22일부터 서울에서 발행되는 신문이 배달되지 못하다가 28일부터 정상배달이 가능해져 29일 그동안 밀렸던 신문들까지 배달되었다. 광주 일부에서는 한때 서울에서는 신문이 발행되지 않고 있다는 허탈이 나돌기도 했는데 각 신문사의 밀렸던 신문이 배달되자 ’그동안 신문이 나왔냐‘고 의아해하는 시민이 있었다.","「조광흠 메모- 1」"]}
 ];}
 
 /* ---------- 스토리 ---------- */
@@ -2105,8 +2146,7 @@ P(4200,()=>state.finalAway?anchorBg():'homeN'),
 L('1980년 5월 27일','SCENE 81 · 장악 이후',()=>state.finalAway?anchorBg():'homeN','','방송도, 경적도, 시민들의 마이크도 잠깐 들리지 않는다.'),
 P(2500,()=>state.finalAway?anchorBg():'homeN'),
 L('1980년 5월 27일','SCENE 82 · 다른 목소리',()=>state.finalAway?anchorBg():'homeN','','지직—\n확성기가 다시 켜진다.',{fx:'static',m:'06:00 이후',u:'군 통제방송'}),
-L('1980년 5월 27일','SCENE 82 · 다른 목소리',()=>state.finalAway?anchorBg():'homeN','계엄군 방송','시민은 거리로 나오지 말 것.\n공무원은 정해진 시각까지 출근할 것.'),
-L('1980년 5월 27일','SCENE 82 · 다른 목소리',()=>state.finalAway?anchorBg():'homeN','계엄군 방송','무기를 가진 사람은 투항할 것.\n군 작전에 협조할 것.'),
+L('1980년 5월 27일','SCENE 82 · 다른 목소리',()=>state.finalAway?anchorBg():'homeN','계엄군 방송','시민은 거리로 나오지 말 것.\n공무원은 정해진 시각까지 출근할 것.\n무기를 가진 사람은 투항할 것.\n군 작전에 협조할 것.'),
 L('1980년 5월 27일','SCENE 82 · 다른 목소리',()=>state.finalAway?anchorBg():'homeN','','비슷한 명령이 계속 반복된다.'),
 L('1980년 5월 27일','SCENE 82 · 다른 목소리',()=>state.finalAway?anchorBg():'homeN','','며칠 동안 거리를 채우던 시민들의 목소리는 들리지 않는다.\n같은 도시의 확성기에서 이제 다른 목소리가 나온다.'),
 
@@ -2143,15 +2183,15 @@ function setbg(c,img=''){
   }
 }
 function updateCinematic(n){
-  const ss=resolve(n.s)||'', tt=resolve(n.t)||'';
+  const ss=resolve(n.s)||'', tt=resolve(n.t)||'', pp=resolve(n.p)||'';
   const active=ss.startsWith('SCENE 27')&&!!n.auto;
   game.classList.toggle('auto-cinematic',active);
-  impactText.classList.remove('show');impactText.textContent='';
-  if(active&&tt.includes('공포탄이야')){impactText.textContent='공포탄이야!';impactText.classList.add('show')}
-  if(active&&(tt==='탕.'||tt.includes('총성이 연달아')||tt.includes('다시 총성'))){
-    impactveil.classList.remove('flash');void impactveil.offsetWidth;impactveil.classList.add('flash');
-  }else if(!active){impactveil.classList.remove('flash')}
+  impactText.className='impact-text';impactText.textContent='';
+  if(active){impactText.textContent=tt;const speech=!!pp||tt==='탕.';impactText.classList.add(speech?'speech':'narration','show');}
+  if(active&&(tt==='탕.'||tt.includes('총성이 연달아')||tt.includes('다시 총성'))){impactveil.classList.remove('flash');void impactveil.offsetWidth;impactveil.classList.add('flash');}
+  else if(!active){impactveil.classList.remove('flash')}
 }
+
 function updateVisualState(n){const ss=resolve(n.s)||'',tt=resolve(n.t)||'';if(ss.startsWith('SCENE 36')&&tt.includes('이불이 창문을 덮자'))state.blanketUp=true;}
 function common(n){
   updateVisualState(n);
@@ -2252,8 +2292,8 @@ function fx(n){
   }
 
   if(ss.startsWith('SCENE 39')){
-    if(tt.includes('엔진 소리가')){playClip('engine',{volume:.76,stopAfter:2200});currentVoice=playClip('v0522blood',{volume:.82,stopAfter:5200});}
-    if(tt.includes('헌혈을 부탁'))playClip('v0522blood',{volume:.82,stopAfter:5200});
+    if(tt.includes('엔진 소리가')){playClip('engine',{volume:.64,stopAfter:1900});currentVoice=playClip('v0522blood',{volume:.28,stopAfter:3600});}
+    if(tt.includes('헌혈을 부탁'))playClip('v0522blood',{volume:.30,stopAfter:3300});
   }
 
   if(ss.startsWith('SCENE 40')&&currentVoice){mediaStop(currentVoice);currentVoice=null;}
@@ -2274,7 +2314,7 @@ function fx(n){
   if(ss.startsWith('SCENE 69')&&n.fx==='engine'){playClip('tank',{volume:.92,stopAfter:2600});return}
   if(ss.startsWith('SCENE 69')&&(tt.includes('사람들이 하나둘 고개')||tt.includes('또 온다')))playClip('tank',{volume:.54,stopAfter:1800});
   if(ss.startsWith('SCENE 70')&&tt.includes('도청 주변에는'))playClip('citizen2',{volume:.54,stopAfter:2200});
-  if(ss.startsWith('SCENE 71')&&tt.includes('마지막 궐기대회가 이어진다'))playClip('citizen3',{volume:.54,stopAfter:2200});
+  
 
 
   if(ss.startsWith('SCENE 77')&&n.fx==='burst'){
@@ -2282,12 +2322,14 @@ function fx(n){
   }
   if(ss.startsWith('SCENE 78')&&tt.includes('확성기에서 다급한 목소리')){
     stopCritical();playFile('micNoise',{volume:.85});
-    playClip('v0526',{volume:.52,stopAfter:2100});
-    setTimeout(()=>playClip('v0527student',{volume:.96,stopAfter:5200}),2200);
+    if(currentVoice)mediaStop(currentVoice);
+    currentVoice=playClip('v0527student',{volume:.96,stopAfter:5200});
     return;
   }
-  if(ss.startsWith('SCENE 78')&&tt.includes('여성의 목소리가 반복해서')){
-    playVoiceSequence(['citizen1','citizen2','citizen3']);
+  if(ss.startsWith('SCENE 78')&&tt.includes('조금 뒤 여성의 목소리가 반복해서')){
+    if(currentVoice)mediaStop(currentVoice);
+    currentVoice=playClip('v0526',{volume:.88,stopAfter:3600});
+    return;
   }
   if(ss.startsWith('SCENE 80')&&n.fx==='burst'){
     stopCritical();criticalAudio=playFile('gunfire27',{volume:.90,start:8});setTimeout(()=>playFile('closeShot',{volume:.90}),240);setTimeout(()=>playFile('closeShot',{volume:.86}),620);shake();return;
@@ -2302,6 +2344,7 @@ function fx(n){
     return;
   }
 
+  if(ss.startsWith('SCENE 50-B')&&n.fx==='horn'){playClip('horn',{volume:.86,stopAfter:420});return}
   if(n.fx==='horn')horn();
   if(n.fx==='shot')shot();
   if(n.fx==='burst')burst();
@@ -2316,7 +2359,7 @@ function render(){
   if(n.type==='p'){
     game.classList.remove('auto-cinematic');impactveil.classList.remove('flash');
     sprite.classList.remove('show');
-    locked=true;dialog.style.display='none';choices.style.display='none';nextMark.style.display='none';setbg(n.b);
+    locked=true;dialog.style.display='none';choices.style.display='none';nextMark.style.display='none';/* 현재 분기 배경 유지 */
     speaker.textContent='';text.textContent='';
     setTimeout(()=>{advanceNode();render()},n.ms||1800);return;
   }
@@ -2387,7 +2430,7 @@ function showRecordIntro(){
     <div class="ending-kicker">기록으로 돌아가기</div>
     <h2 class="ending-title">당신이 지나온 장면과 기록</h2>
     <div class="ending-body">이 프로젝트의 핵심 인물과 일부 대화·장면은 실제 기록을 바탕으로 재구성되었습니다.\n\n이제, 당신이 지나온 장면을 실제 기록과 나란히 놓아봅니다.</div>
-    <div class="ending-echo">기록카드에는 제공받은 사진과 실제 기록의 발췌문을 함께 담았습니다. 긴 기록은 첫 발췌문만 먼저 보이고, ‘기록 더보기’를 누르면 이어서 확인할 수 있습니다.</div>
+    <div class="ending-echo">기록카드에는 기록 이미지와 실제 기록의 발췌문을 함께 담았습니다. 긴 기록은 첫 발췌문만 먼저 보이고, ‘기록 더보기’를 누르면 이어서 확인할 수 있습니다.</div>
     <div class="end-actions"><button class="primary" id="recordStart">첫 기록 보기</button></div>
   </div>`;
   $('#recordStart').onclick=()=>showRecord(0);
@@ -2415,7 +2458,8 @@ function showRecord(idx){
   const imgs=(r.images||[]).map(x=>`<figure><img src="${x.src}" alt="${esc(r.title)} 관련 기록 이미지" loading="lazy"><figcaption>${esc(x.caption)}</figcaption></figure>`).join('');
   const excerpts=r.excerpts||[]; const first=excerpts[0]?`<div class="record-excerpt">${esc(excerpts[0])}</div>`:'';
   const cx=recordContext(r.title);
-  const contextHtml=`${cx.original?`<div class="record-label">원문/기록물</div><div class="record-text">${esc(cx.original)}</div>`:''}${cx.fact?`<div class="record-label">기록에서 확인되는 사실</div><div class="record-text">${esc(cx.fact)}</div>`:''}${cx.reaction?`<div class="record-label">기록에 남은 반응</div><div class="record-text">${esc(cx.reaction)}</div>`:''}${cx.uncertain?`<div class="record-label">확인되지 않은 부분</div><div class="record-text">${esc(cx.uncertain)}</div>`:''}${cx.recon?`<div class="record-label">프로젝트에서 재구성한 부분</div><div class="record-text">${esc(cx.recon)}</div>`:''}`;
+  const factHtml=`${cx.fact?`<div class="record-label">기록에서 확인되는 사실</div><div class="record-text">${esc(cx.fact)}</div>`:''}`;
+  const afterRecordHtml=`${cx.original?`<div class="record-label">원문/기록물</div><div class="record-text">${esc(cx.original)}</div>`:''}${cx.reaction?`<div class="record-label">기록에 남은 반응</div><div class="record-text">${esc(cx.reaction)}</div>`:''}${cx.uncertain?`<div class="record-label">확인되지 않은 부분</div><div class="record-text">${esc(cx.uncertain)}</div>`:''}${cx.recon?`<div class="record-label">프로젝트에서 재구성한 부분</div><div class="record-text">${esc(cx.recon)}</div>`:''}`;
   const extraExcerpts=excerpts.slice(1).map(x=>`<div class="record-excerpt">${esc(x)}</div>`).join('');
   const more=extraExcerpts;
   const note=r.note?`<div class="record-label">기록을 읽을 때</div><div class="record-text">${esc(r.note)}</div>`:'';
@@ -2425,9 +2469,10 @@ function showRecord(idx){
       <div class="record-date">${esc(r.date)}</div>
       <div class="record-title">${esc(r.title)}</div>
       ${imgs?`<div class="record-media">${imgs}</div>`:''}
-      ${contextHtml}
+      ${factHtml}
       <div class="record-label">실제 기록 발췌</div>${first}
       ${more?`<div class="record-more" id="recordMore">${more}</div><button class="more-btn" id="moreBtn">기록 더보기</button>`:''}
+      ${afterRecordHtml}
       ${note}
       <div class="record-source">출처 · ${esc(r.source)}</div>
     </div>
@@ -2456,12 +2501,20 @@ function showSources(){
     <div class="ending-kicker">SOURCES</div>
     <h2 class="ending-title">전체 출처</h2>
     <ul class="source-list">
-      <li>5·18민주화운동기록관</li><li>「2025 광주민중항쟁과 여성」</li><li>「구술생애사를 통해 본 5·18의 기억과 역사 12 청소년편」</li><li>「10일의 기억1-15인 시민의 기억」</li><li>「10일의 기억2-15인 시민의 기억」</li><li>「10일의 기억3-너를 눕히고 오는 길에」</li><li>「5·18민주화운동자료총서-12권」</li><li>「5·18민주화운동기록물 자료총서 01_오월일기」</li><li>「5·18민주화운동기록물 자료총서 02_취재수첩」</li><li>「조광흠 메모」</li><li>「1988년도 성명서자료」 오늘은 민주기사의 날(1988.5.20.)</li><li>5·18기록관 전시</li><li>「한국현대사 산책 1980년대 편 광주학살과 서울 올림픽 1권」</li><li>국사편찬위원회 우리역사넷 「5·18 민주화 운동시 광주 시민 궐기문」</li>
+      <li>5·18민주화운동기록관</li><li>「2025 광주민중항쟁과 여성」</li><li>「구술생애사를 통해 본 5·18의 기억과 역사 12 청소년편」</li><li>「10일의 기억1-15인 시민의 기억」</li><li>「10일의 기억2-15인 시민의 기억」</li><li>「10일의 기억3-너를 눕히고 오는 길에」</li><li>「5·18민주화운동자료총서-12권」</li><li>「5·18민주화운동기록물 자료총서 01_오월일기」</li><li>「5·18민주화운동기록물 자료총서 02_취재수첩」</li><li>「조광흠 메모」</li><li>「1988년도 성명서자료」 오늘은 민주기사의 날(1988.5.20.)</li><li>5·18민주화운동기록관 전시</li><li>「한국현대사 산책 1980년대 편 광주학살과 서울 올림픽 1권」</li>
     </ul>
     <div class="end-actions"><button class="primary" id="backFinal">마지막 화면으로</button></div>
   </div>`;
   $('#backFinal').onclick=showFinalMenu;
 }
+function showCredits(){
+  end.innerHTML=`<div class="ending-scroll"><div class="ending-kicker">CREDIT</div><h2 class="ending-title">크레딧</h2><div class="ending-body"><b>기획·제작 | 이민재</b>
+프로젝트 | 연(連)</div><div class="ending-echo credit-rule"><b>음성 참여</b> | 방예령 · 신영희 · 이민재 · 이종석 · 정혜민
+
+<b>기록 조사·발췌</b> | 방예령 · 신영희 · 이민재 · 정혜민</div><div class="end-actions"><button class="primary" id="backFinal">마지막 화면으로</button></div></div>`;
+  $('#backFinal').onclick=showFinalMenu;
+}
+
 function scoreRows(obj){return Object.entries(obj).map(([k,v])=>`${k}:${v}`).join(' · ')}
 function showFinalMenu(){
   const a=ensureAnchor(), e=endingData[state.endingType]||endingData.balanced;
@@ -2470,15 +2523,16 @@ function showFinalMenu(){
     <h2 class="ending-title">5·18민주화운동</h2>
     <div class="ending-body">당신이 보지 못한 곳에서도 같은 열흘을 보낸 사람들이 있었다.</div>
     <div class="ending-echo">이 프로젝트는 당시 시민들의 일기, 취재수첩과 사진, 시민 문서, 구술자료 등을 참고해 제작되었습니다.</div>
-    <div class="ending-echo credit-rule"><b>제작 연(連)</b><br>청년 세계유산 지킴이 활동으로 제작<br>E-mail · sasa2310@naver.com<br>Instagram · @connect_5.18<a class="final-link" href="${SHARE_URL}" target="_blank" rel="noopener">${SHARE_URL}</a></div>
+    <div class="ending-echo credit-rule"><b>제작 연(連)</b><br>E-mail · sasa2310@naver.com<br>Instagram · @connect_5.18<a class="final-link" href="${SHARE_URL}" target="_blank" rel="noopener">${SHARE_URL}</a></div>
     <div class="end-actions">
       <button class="end-secondary" id="choicesSummary">내가 지나온 선택 보기</button>
       <button class="end-secondary" id="sourcesBtn">전체 출처 보기</button>
+      <button class="end-secondary" id="creditsBtn">크레딧</button>
       <button class="end-secondary" id="shareBtn">공유하기</button>
       <button class="primary" id="restart">다시 시작하기</button>
     </div>
   </div>`;
-  $('#choicesSummary').onclick=showChoicesSummary;$('#sourcesBtn').onclick=showSources;$('#shareBtn').onclick=showShareOptions;$('#restart').onclick=restartGame;
+  $('#choicesSummary').onclick=showChoicesSummary;$('#sourcesBtn').onclick=showSources;$('#creditsBtn').onclick=showCredits;$('#shareBtn').onclick=showShareOptions;$('#restart').onclick=restartGame;
 }
 function shareTexts(){
   const a=ensureAnchor(), e=endingData[state.endingType]||endingData.balanced;
@@ -2523,7 +2577,14 @@ async function shareMessage(msg,mode='plain'){
 soundBtn.onclick=e=>{e.stopPropagation();soundOn=!soundOn;soundIcon();if(!soundOn)stopAllStoryAudio();else{audio();const n=currentNode();if(n)syncSceneAudio(n)}};
 historyBtn.onclick=e=>{e.stopPropagation();drawHistory();history.style.display='block'};
 historyClose.onclick=e=>{e.stopPropagation();history.style.display='none'};
-$('#start').onclick=()=>{cover.style.display='none';trackEvent('simulation_start',{version:'final_20260919'});audio();soundIcon();render()};
+let introStep=0,introTimer=null;
+const INTRO_PAGES=[
+`<b>이 콘텐츠는 소리와 함께 구성되어 있습니다.</b>\n\n가능하다면 소리를 켜고 시작해 주세요.\n\n소리를 끈 상태에서도 주요 상황을 이해할 수 있도록 구성되어 있습니다.\n\n<b>당신의 선택으로 역사적 사건의 결과가 바뀌지는 않습니다.</b>\n선택에 따라 만나게 되는 사람과 지나게 되는 장면이 달라집니다.`,
+`<b>5·18민주화운동 기록물은 유네스코 세계기록유산입니다.</b>\n\n이 콘텐츠는 그 기록 가운데 시민들이 남긴 성명서·선언문, 일기, 취재수첩, 증언 등\n시민 생산 기록을 중심으로 참고해 제작했습니다.\n\n이 프로젝트는 2026 청년 세계유산 지킴이 활동으로 제작되었습니다.`
+];
+function showIntroStep(){clearTimeout(introTimer);if(introStep>=INTRO_PAGES.length){introScreen.style.display='none';render();return}introInner.innerHTML=INTRO_PAGES[introStep];introScreen.style.display='flex';introTimer=setTimeout(()=>{introStep++;showIntroStep()},introStep===0?5200:6200)}
+introScreen.onclick=e=>{e.stopPropagation();introStep++;showIntroStep()};
+$('#start').onclick=()=>{cover.style.display='none';trackEvent('simulation_start',{version:'final_20260922_rev2'});audio();soundIcon();introStep=0;showIntroStep()};
 function restartGame(){location.reload()}
 soundIcon();
 window.addEventListener('keydown',e=>{
